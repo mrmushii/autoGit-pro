@@ -111,10 +111,18 @@ Open a folder without Git initialized:
 
 **"Push rejected"** — Extension auto-pulls and retries
 
+## 👨‍💻 Developer
+
+**Mushfiqur Rahman**
+
+- 🔗 GitHub: [@mrmushii](https://github.com/mrmushii)
+- 💼 LinkedIn: [Mushfiqur Rahman](https://www.linkedin.com/in/mushfiqur-rahman-7bb295289/)
+- 🌐 Portfolio: [my-portfolio-eight-phi-80.vercel.app](https://my-portfolio-eight-phi-80.vercel.app/)
+
 ## 📄 License
 
-MIT License
+MIT License © 2025 Mushfiqur Rahman
 
 ---
 
-**Made with ❤️ for developers**
+**Made with ❤️ by Mushfiqur Rahman**

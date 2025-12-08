@@ -2,8 +2,12 @@
   "name": "autogit-pro",
   "displayName": "AutoGit Pro",
   "description": "Automate Git workflows with AI-powered commit message generation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "autogit-pro",
+  "author": {
+    "name": "Mushfiqur Rahman",
+    "url": "https://github.com/mrmushii"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -16,7 +20,10 @@
     "commit",
     "automation",
     "ai",
-    "productivity"
+    "productivity",
+    "groq",
+    "openai",
+    "gemini"
   ],
   "icon": "images/icon.png",
   "galleryBanner": {
@@ -25,7 +32,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/autogit-pro/autogit-pro-vscode"
+    "url": "https://github.com/mrmushii/autogit-pro"
+  },
+  "homepage": "https://github.com/mrmushii/autogit-pro#readme",
+  "bugs": {
+    "url": "https://github.com/mrmushii/autogit-pro/issues"
   },
   "activationEvents": [
     "onCommand:autogit-pro.commit",
