@@ -2,7 +2,7 @@
 
 All notable changes to AutoGit Pro will be documented in this file.
 
-## [1.0.1] - 2024-12-08
+## [1.0.1] - 2025-12-08
 
 ### Added
 
@@ -15,7 +15,7 @@ All notable changes to AutoGit Pro will be documented in this file.
 - ✅ Branch name validation
 - 🔄 Auto-pull when push is rejected
 
-## [1.0.0] - 2024-12-08
+## [1.0.0] - 2025-12-08
 
 ### Added
 
