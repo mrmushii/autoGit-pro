@@ -1,0 +1,156 @@
+{
+  "name": "autogit-pro",
+  "displayName": "AutoGit Pro",
+  "description": "Automate Git workflows with AI-powered commit message generation",
+  "version": "1.0.0",
+  "publisher": "autogit-pro",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "commit",
+    "automation",
+    "ai",
+    "productivity"
+  ],
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/autogit-pro/autogit-pro-vscode"
+  },
+  "activationEvents": [
+    "onCommand:autogit-pro.commit",
+    "onCommand:autogit-pro.quickCommit"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "autogit-pro.commit",
+        "title": "AutoGit Pro: Commit & Push"
+      },
+      {
+        "command": "autogit-pro.quickCommit",
+        "title": "AutoGit Pro: Quick Commit (AI Message)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "autogit-pro.commit",
+        "key": "ctrl+alt+g",
+        "mac": "cmd+alt+g"
+      },
+      {
+        "command": "autogit-pro.quickCommit",
+        "key": "ctrl+alt+q",
+        "mac": "cmd+alt+q"
+      }
+    ],
+    "configuration": {
+      "title": "AutoGit Pro",
+      "properties": {
+        "autogit-pro.aiProvider": {
+          "type": "string",
+          "default": "groq",
+          "enum": [
+            "openai",
+            "gemini",
+            "groq",
+            "none"
+          ],
+          "enumDescriptions": [
+            "Use OpenAI GPT for commit message generation",
+            "Use Google Gemini for commit message generation",
+            "Use Groq (FREE) for commit message generation - Recommended!",
+            "Disable AI commit message generation"
+          ],
+          "description": "AI provider for generating commit messages"
+        },
+        "autogit-pro.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API key for commit message generation"
+        },
+        "autogit-pro.openaiModel": {
+          "type": "string",
+          "default": "gpt-4o-mini",
+          "description": "OpenAI model to use for commit message generation"
+        },
+        "autogit-pro.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini API key for commit message generation"
+        },
+        "autogit-pro.geminiModel": {
+          "type": "string",
+          "default": "gemini-2.0-flash-001",
+          "description": "Gemini model to use for commit message generation"
+        },
+        "autogit-pro.groqApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Groq API key for commit message generation (FREE - Get it at console.groq.com)"
+        },
+        "autogit-pro.groqModel": {
+          "type": "string",
+          "default": "llama-3.1-8b-instant",
+          "description": "Groq model to use for commit message generation"
+        },
+        "autogit-pro.defaultRemote": {
+          "type": "string",
+          "default": "origin",
+          "description": "Default remote name for push operations"
+        },
+        "autogit-pro.autoStageAll": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically stage all changes before commit"
+        },
+        "autogit-pro.confirmBeforePush": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show confirmation dialog before pushing"
+        },
+        "autogit-pro.pushAfterCommit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically push after successful commit"
+        },
+        "autogit-pro.commitMessageTemplate": {
+          "type": "string",
+          "default": "",
+          "description": "Custom template for commit messages. Use {type}, {scope}, {subject} placeholders."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vscode/vsce": "^2.22.0",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {}
+}
