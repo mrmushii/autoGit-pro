@@ -71,6 +71,13 @@ export async function getRepositoryRoot(cwd: string): Promise<GitOperationResult
 }
 
 /**
+ * Initialize a new Git repository with main as default branch
+ */
+export async function initRepository(cwd: string): Promise<GitOperationResult<string>> {
+    return executeGit(cwd, 'init -b main');
+}
+
+/**
  * Get the current branch name
  */
 export async function getCurrentBranch(cwd: string): Promise<GitOperationResult<string>> {
@@ -136,6 +143,22 @@ export async function checkoutBranch(cwd: string, branch: string): Promise<GitOp
  * Create and checkout a new branch
  */
 export async function createBranch(cwd: string, branch: string): Promise<GitOperationResult<void>> {
+    // Validate branch name (no spaces, special chars)
+    if (!branch || branch.trim().length === 0) {
+        return {
+            success: false,
+            error: 'Branch name cannot be empty',
+        };
+    }
+    
+    // Check for invalid characters
+    if (/[\s~^:?*\[\]\\]/.test(branch)) {
+        return {
+            success: false,
+            error: 'Branch name contains invalid characters (spaces or special chars)',
+        };
+    }
+    
     const result = await executeGit(cwd, `checkout -b "${branch}"`);
     
     if (result.success) {
@@ -256,8 +279,24 @@ export async function stageFiles(cwd: string, files: string[]): Promise<GitOpera
  * Create a commit with the specified message
  */
 export async function commit(cwd: string, message: string): Promise<GitOperationResult<string>> {
-    // Escape the message for shell
-    const escapedMessage = message.replace(/"/g, '\\"');
+    // Validate message
+    if (!message || message.trim().length === 0) {
+        return {
+            success: false,
+            error: 'Commit message cannot be empty',
+        };
+    }
+    
+    // Escape special characters for shell safety
+    // Replace backticks, dollar signs, and escape quotes
+    const escapedMessage = message
+        .replace(/\\/g, '\\\\')     // Escape backslashes first
+        .replace(/"/g, '\\"')       // Escape double quotes
+        .replace(/`/g, '\\`')       // Escape backticks
+        .replace(/\$/g, '\\$')      // Escape dollar signs
+        .replace(/\n/g, ' ')        // Replace newlines with space
+        .trim();
+    
     const result = await executeGit(cwd, `commit -m "${escapedMessage}"`);
     
     if (result.success) {
@@ -418,5 +457,28 @@ export async function fetch(cwd: string, remote: string): Promise<GitOperationRe
     return {
         success: false,
         error: result.error || 'Failed to fetch from remote',
+    };
+}
+
+/**
+ * Pull from remote (with rebase option)
+ */
+export async function pull(
+    cwd: string,
+    remote: string = 'origin',
+    branch: string = '',
+    rebase: boolean = false
+): Promise<GitOperationResult<void>> {
+    const rebaseFlag = rebase ? '--rebase' : '';
+    const branchArg = branch ? `${remote} ${branch}` : remote;
+    const result = await executeGit(cwd, `pull ${rebaseFlag} ${branchArg}`.trim());
+    
+    if (result.success) {
+        return { success: true };
+    }
+    
+    return {
+        success: false,
+        error: result.error || 'Failed to pull from remote',
     };
 }

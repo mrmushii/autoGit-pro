@@ -40,6 +40,17 @@ export async function detectRepository(): Promise<string | undefined> {
 }
 
 /**
+ * Get the first workspace folder path (even if not a git repo)
+ */
+export function getWorkspaceFolderPath(): string | undefined {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length > 0) {
+        return workspaceFolders[0].uri.fsPath;
+    }
+    return undefined;
+}
+
+/**
  * Get all Git repositories in the workspace
  */
 export async function getWorkspaceRepositories(): Promise<string[]> {

@@ -4,7 +4,7 @@
  */
 
 import { getExtensionConfig, type AIProviderConfig, type ExtensionConfig } from '../types';
-import { detectRepository } from '../utils/repoDetector';
+import { detectRepository, getWorkspaceFolderPath } from '../utils/repoDetector';
 import {
     isGitInstalled,
     getCurrentBranch,
@@ -16,9 +16,11 @@ import {
     stageAll,
     commit,
     push,
+    pull,
     getStatus,
     getDiffContext,
     hasUpstream,
+    initRepository,
 } from '../utils/git';
 import { generateCommitMessage, validateAIConfig } from '../utils/ai';
 import { TerminalWorkflow } from '../ui/terminal';
@@ -57,25 +59,65 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
     }
     terminal.showSuccess('Git is available');
     
-    // Step 2: Detect repository
+    // Step 2: Detect repository (or initialize new one)
     terminal.showProgress('Detecting repository');
-    const repoPath = await detectRepository();
+    let repoPath = await detectRepository();
+    
     if (!repoPath) {
-        terminal.showError('No Git repository found. Please open a folder with a Git repository.');
-        terminal.close();
-        return;
+        // No repo found - offer to initialize
+        const workspacePath = getWorkspaceFolderPath();
+        if (!workspacePath) {
+            terminal.showError('No folder open. Please open a folder first.');
+            terminal.close();
+            return;
+        }
+        
+        terminal.showInfo('No Git repository found in this folder.');
+        terminal.writeLine('');
+        const repoUrl = await terminal.input('GitHub repo URL (or press Enter to skip)', '');
+        
+        if (!repoUrl) {
+            terminal.showError('No repository URL provided. Exiting.');
+            terminal.close();
+            return;
+        }
+        
+        // Initialize git
+        terminal.showProgress('Initializing Git repository');
+        const initResult = await initRepository(workspacePath);
+        if (!initResult.success) {
+            terminal.showError(initResult.error || 'Failed to initialize repository');
+            terminal.close();
+            return;
+        }
+        terminal.showSuccess('Git repository initialized');
+        
+        // Add remote
+        terminal.showProgress('Adding remote origin');
+        const addRemoteResult = await addRemote(workspacePath, 'origin', repoUrl);
+        if (!addRemoteResult.success) {
+            terminal.showError(addRemoteResult.error || 'Failed to add remote');
+            terminal.close();
+            return;
+        }
+        terminal.showSuccess(`Remote added: ${repoUrl}`);
+        
+        repoPath = workspacePath;
     }
+    
     terminal.showSuccess(`Repository: ${repoPath}`);
     
-    // Step 3: Get current branch
+    // Step 3: Get current branch (default to 'main' for new repos)
     const branchResult = await getCurrentBranch(repoPath);
-    if (!branchResult.success || !branchResult.data) {
-        terminal.showError(branchResult.error || 'Failed to detect current branch');
-        terminal.close();
-        return;
+    let currentBranch = branchResult.data || 'main';
+    
+    // For new repos, there's no branch until first commit - use 'main' as default
+    if (!branchResult.success || currentBranch === 'HEAD') {
+        currentBranch = 'main';
+        terminal.showInfo('New repository - will use branch: main');
+    } else {
+        terminal.showInfo(`Current branch: ${currentBranch}`);
     }
-    let currentBranch = branchResult.data;
-    terminal.showInfo(`Current branch: ${currentBranch}`);
     
     // Step 4: Check for changes
     const statusResult = await getStatus(repoPath);
@@ -224,7 +266,25 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
     if (shouldPush) {
         terminal.showProgress(`Pushing to ${remoteName}/${currentBranch}`);
         const upstreamSet = await hasUpstream(repoPath, currentBranch);
-        const pushResult = await push(repoPath, remoteName, currentBranch, !upstreamSet);
+        let pushResult = await push(repoPath, remoteName, currentBranch, !upstreamSet);
+        
+        // If push failed, try pulling first
+        if (!pushResult.success && pushResult.error?.includes('rejected')) {
+            terminal.showInfo('Remote has new changes. Pulling first...');
+            terminal.showProgress('Pulling from remote');
+            const pullResult = await pull(repoPath, remoteName, currentBranch, true);
+            
+            if (!pullResult.success) {
+                terminal.showError(pullResult.error || 'Failed to pull. Please resolve conflicts manually.');
+                terminal.close();
+                return;
+            }
+            terminal.showSuccess('Pulled successfully');
+            
+            // Retry push
+            terminal.showProgress(`Pushing to ${remoteName}/${currentBranch}`);
+            pushResult = await push(repoPath, remoteName, currentBranch, false);
+        }
         
         if (!pushResult.success) {
             terminal.showError(pushResult.error || 'Failed to push');

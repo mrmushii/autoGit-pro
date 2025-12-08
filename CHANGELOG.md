@@ -2,63 +2,26 @@
 
 All notable changes to AutoGit Pro will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [1.0.0] - 2024-12-08
 
 ### Added
 
-- **Core Features**
-  - One-click commit & push workflow
-  - Branch selection and creation before commit
-  - Automatic remote configuration when missing
-  - Multi-repository workspace support
+- 🚀 One-click commit and push workflow with interactive terminal UI
+- 🤖 AI-powered commit message generation (Groq, OpenAI, Gemini)
+- 📁 Auto-initialize Git repositories with GitHub URL
+- 🌿 Branch switching and creation inline
+- 🔄 Auto-pull when push is rejected (remote ahead)
+- ⌨️ Keyboard shortcuts: `Ctrl+Alt+G` and `Ctrl+Alt+Q`
+- ⚙️ Configurable AI providers and Git settings
 
-- **AI Commit Message Generation**
-  - OpenAI GPT integration
-  - Google Gemini integration
-  - Commit messages following Conventional Commits specification
-  - Message preview and editing before commit
+### AI Providers
 
-- **Commands**
-  - `AutoGit Pro: Commit & Push` - Full workflow with prompts
-  - `AutoGit Pro: Quick Commit (AI Message)` - Fast AI-powered commit
-
-- **Keyboard Shortcuts**
-  - `Ctrl+Shift+G Ctrl+Shift+C` - Commit & Push
-  - `Ctrl+Shift+G Ctrl+Shift+Q` - Quick Commit
-
-- **Configuration Options**
-  - AI provider selection (OpenAI, Gemini, None)
-  - API key configuration for each provider
-  - Model selection for AI providers
-  - Auto-stage all changes option
-  - Confirm before push option
-  - Push after commit toggle
-  - Default remote name setting
-
-- **User Experience**
-  - Progress indicators during operations
-  - Clear error messages with troubleshooting hints
-  - Welcome message on first activation
-  - Settings link for easy configuration
+- **Groq** (FREE - Recommended) - Llama 3.1 for fast, free commit messages
+- **OpenAI** - GPT-4o-mini for high-quality messages
+- **Gemini** - Google's AI for commit generation
 
 ### Security
 
-- API keys stored in VS Code settings (user-level)
-- API calls made directly to provider endpoints
-- No telemetry or data collection
-
-## [Unreleased]
-
-### Planned
-
-- Auto-push on file save (opt-in)
-- GitHub Actions integration
-- Smart branch naming suggestions
-- Team workflow templates
-- Commit message linting
-- Git hooks integration
-- Changelog generation
-- Multi-language commit messages
+- Commit message sanitization (escapes special shell characters)
+- Branch name validation (prevents invalid characters)
+- Empty message protection

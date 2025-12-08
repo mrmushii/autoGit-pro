@@ -1,196 +1,120 @@
-# AutoGit Pro - VS Code Extension
+# AutoGit Pro
 
-<p align="center">
-  <img src="images/icon.png" alt="AutoGit Pro" width="128">
-</p>
+> **One-click Git workflow automation with AI-powered commit messages**
 
-**Automate Git workflows with AI-powered commit message generation.**
-
-AutoGit Pro streamlines your Git workflow by providing a single keyboard shortcut to stage, commit, and push your changes. With optional AI integration (OpenAI or Google Gemini), it can automatically generate meaningful commit messages following best practices.
+[![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue.svg)](https://code.visualstudio.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## ✨ Features
 
-- **🚀 One-Click Commit & Push** - Stage, commit, and push with a single keyboard shortcut
-- **🤖 AI-Powered Commit Messages** - Generate intelligent commit messages using OpenAI GPT or Google Gemini
-- **🌿 Branch Management** - Switch branches or create new ones before committing
-- **📡 Remote Auto-Configuration** - Automatically prompt for remote URL if not configured
-- **📦 Multi-Repo Support** - Works with multiple repositories in your workspace
-- **⚡ Quick Mode** - Skip prompts for faster commits with AI-generated messages
+- 🚀 **One-Click Commit & Push** — Stage, commit, and push with a single shortcut
+- 🤖 **AI Commit Messages** — Auto-generate meaningful commits using Groq (FREE), OpenAI, or Gemini
+- 📁 **Auto-Initialize Repos** — No Git? Provide a GitHub URL and we'll set it up
+- 🌿 **Branch Management** — Switch or create branches inline
+- 🔄 **Smart Sync** — Auto-pull when remote has new commits
+- 🔧 **Terminal-Based UI** — Clean, interactive workflow
 
-## 📥 Installation
+## 🎯 Quick Start
 
-### From VS Code Marketplace
+### 1. Install
 
-1. Open VS Code
-2. Press `Ctrl+P` / `Cmd+P`
-3. Type `ext install autogit-pro`
-4. Press Enter
+Search for **"AutoGit Pro"** in VS Code Extensions.
 
-### From VSIX File
+### 2. Get FREE API Key (Recommended)
 
-1. Download the `.vsix` file from releases
-2. Open VS Code
-3. Press `Ctrl+Shift+P` / `Cmd+Shift+P`
-4. Type "Install from VSIX" and select it
-5. Choose the downloaded `.vsix` file
+For AI commit messages, get a free Groq API key:
+
+1. Go to [console.groq.com](https://console.groq.com)
+2. Create account (no credit card needed)
+3. Generate an API key
+
+### 3. Configure
+
+Open VS Code Settings (`Ctrl+,`) → search "autogit-pro":
+
+- Set **AI Provider** to `groq`
+- Paste your **Groq API Key**
+
+### 4. Use It
+
+Press **`Ctrl+Alt+G`** and follow the prompts!
 
 ## ⌨️ Keyboard Shortcuts
 
-| Command | Shortcut (Windows/Linux) | Shortcut (Mac) |
-|---------|--------------------------|----------------|
-| Commit & Push | `Ctrl+Shift+G Ctrl+Shift+C` | `Cmd+Shift+G Cmd+Shift+C` |
-| Quick Commit (AI) | `Ctrl+Shift+G Ctrl+Shift+Q` | `Cmd+Shift+G Cmd+Shift+Q` |
+| Command | Shortcut | Description |
+|---------|----------|-------------|
+| Commit & Push | `Ctrl+Alt+G` | Full interactive workflow |
+| Quick Commit | `Ctrl+Alt+Q` | AI-first quick commit |
 
-You can customize these in VS Code's Keyboard Shortcuts settings.
+## 📋 Workflow Demo
 
-## ⚙️ Configuration
+```text
+ AutoGit Pro - Commit & Push 
 
-Open VS Code settings (`Ctrl+,` / `Cmd+,`) and search for "AutoGit Pro".
-
-### AI Provider Settings
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `autogit-pro.aiProvider` | AI provider for commit messages (`openai`, `gemini`, `none`) | `none` |
-| `autogit-pro.openaiApiKey` | Your OpenAI API key | - |
-| `autogit-pro.openaiModel` | OpenAI model to use | `gpt-4o-mini` |
-| `autogit-pro.geminiApiKey` | Your Google Gemini API key | - |
-| `autogit-pro.geminiModel` | Gemini model to use | `gemini-1.5-flash` |
-
-### Workflow Settings
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `autogit-pro.defaultRemote` | Default remote name for push | `origin` |
-| `autogit-pro.autoStageAll` | Automatically stage all changes | `true` |
-| `autogit-pro.confirmBeforePush` | Show confirmation before pushing | `true` |
-| `autogit-pro.pushAfterCommit` | Automatically push after commit | `true` |
-
-### Example Configuration (settings.json)
-
-```json
-{
-  "autogit-pro.aiProvider": "openai",
-  "autogit-pro.openaiApiKey": "sk-...",
-  "autogit-pro.openaiModel": "gpt-4o-mini",
-  "autogit-pro.confirmBeforePush": true,
-  "autogit-pro.autoStageAll": true
-}
+✓ Git is available
+✓ Repository: D:\Projects\my-app
+ℹ Current branch: main
+ℹ Changes: 2 modified, 1 new
+──────────────────────────────────────
+▸ Branch [main]: 
+⟳ Generating AI commit message...
+✓ AI generated: feat: add user authentication
+▸ Commit message [feat: add user authentication]: 
+▸ Proceed with commit and push [Y/n]: 
+──────────────────────────────────────
+✓ Changes staged
+✓ Commit created
+✓ Pushed to origin/main
+✓ ✨ All done!
 ```
 
-## 🤖 AI Commit Message Examples
+**Press Enter** to accept defaults — it's that simple!
 
-When using AI-powered commit generation, AutoGit Pro analyzes your changes and generates messages following the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+## 🤖 AI Providers
 
-```
-feat(auth): Add OAuth2 login with Google provider
+| Provider | Cost | Speed | Get Key |
+|----------|------|-------|---------|
+| **Groq** | FREE | ⚡ Fast | [console.groq.com](https://console.groq.com) |
+| OpenAI | Paid | Fast | [platform.openai.com](https://platform.openai.com) |
+| Gemini | Free tier | Fast | [aistudio.google.com](https://aistudio.google.com) |
 
-- Implement OAuth2 flow using passport.js
-- Add Google strategy configuration
-- Create user session management
-- Add logout endpoint
-```
+## ⚙️ Settings
 
-```
-fix(api): Handle null response in user endpoint
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `aiProvider` | `groq` | AI provider (groq/openai/gemini/none) |
+| `groqApiKey` | — | Your Groq API key |
+| `autoStageAll` | `true` | Auto-stage all changes |
+| `pushAfterCommit` | `true` | Auto-push after commit |
+| `confirmBeforePush` | `true` | Confirm before pushing |
 
-Prevents crash when user service returns null for
-non-existent users. Now returns 404 with proper error message.
-```
+## 🆕 New Repo Setup
 
-```
-refactor(core): Simplify error handling logic
+Open a folder without Git initialized:
 
-Replace nested try-catch blocks with async error middleware.
-Reduces code duplication and improves readability.
-```
+1. Extension prompts for GitHub repo URL
+2. Runs `git init -b main`
+3. Adds remote origin
+4. Ready to commit!
 
-```
-docs(readme): Update installation instructions
+## 📦 Requirements
 
-Add VSIX installation method and troubleshooting section.
-```
+- VS Code 1.85+
+- Git installed and in PATH
+- (Optional) API key for AI commits
 
-## 🔧 Workflow
+## 🔧 Troubleshooting
 
-When you trigger AutoGit Pro (default: `Ctrl+Shift+G Ctrl+Shift+C`):
+**"Git not found"** — Install Git and add to PATH
 
-1. **Detect Repository** - Finds the Git repository from your active file or workspace
-2. **Check Changes** - Verifies there are changes to commit
-3. **Branch Selection** - Optionally switch to a different branch or create a new one
-4. **Commit Message** - Choose between AI-generated or manual commit message
-5. **Remote Check** - If no remote is configured, prompts for the URL
-6. **Confirm & Execute** - Shows summary and executes git add, commit, push
+**"AI failed"** — Check API key and internet connection
 
-### Quick Mode
-
-Use `Ctrl+Shift+G Ctrl+Shift+Q` for a faster workflow:
-- Automatically generates AI commit message (if configured)
-- Skips branch selection
-- Minimal confirmations
-
-## 🛠️ Requirements
-
-- **VS Code** 1.85.0 or higher
-- **Git** installed and available in PATH
-- **API Key** (optional) - OpenAI or Google Gemini for AI features
-
-## 🐛 Troubleshooting
-
-### "Git is not installed or not in PATH"
-- Ensure Git is installed: Download from [git-scm.com](https://git-scm.com/)
-- Verify by running `git --version` in a terminal
-
-### "No Git repository found"
-- Open a folder containing a Git repository
-- Initialize a repo with `git init` if needed
-
-### AI message generation fails
-- Check your API key is correctly set in settings
-- Verify you have API credits/quota remaining
-- Try switching to a different AI provider
-
-### Push fails
-- Ensure you have write access to the remote repository
-- Check for uncommitted merge conflicts
-- Verify branch tracking is set up correctly
-
-## 📦 Building from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/autogit-pro/autogit-pro-vscode.git
-cd autogit-pro-vscode
-
-# Install dependencies
-npm install
-
-# Compile TypeScript
-npm run compile
-
-# Package the extension
-npm run package
-```
-
-## 🚀 Future Enhancements
-
-- [ ] Auto-push on file save (opt-in)
-- [ ] GitHub Actions integration
-- [ ] Smart branch naming suggestions
-- [ ] Team workflow templates
-- [ ] Commit message linting
-- [ ] Git hooks integration
-- [ ] Changelog generation
-- [ ] Multi-language commit messages
+**"Push rejected"** — Extension auto-pulls and retries
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+MIT License
 
 ---
 
-**Enjoy hassle-free Git workflows with AutoGit Pro!** 🚀
+**Made with ❤️ for developers**
