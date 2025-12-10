@@ -46,8 +46,12 @@ export async function executeAutoCommit(quickMode: boolean = false): Promise<voi
 /**
  * Main workflow logic
  */
-async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Promise<void> {
+async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Promise<void> {
     const config = getExtensionConfig();
+    
+    if (quickMode) {
+        terminal.showInfo('⚡ Quick Mode: Using AI message, current branch, no confirmations');
+    }
     
     // Step 1: Check Git installation
     terminal.showProgress('Checking Git installation');
@@ -138,22 +142,27 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
     terminal.separator();
     
     // Step 5: Target branch selection (we'll switch AFTER committing if needed)
-    terminal.writeLine('');
-    const branchInput = await terminal.input('Push to branch', currentBranch);
-    const targetBranch = branchInput;
-    const needsBranchSwitch = targetBranch !== currentBranch;
-    
-    // Validate target branch (check if it exists or will be created)
+    let targetBranch = currentBranch;
+    let needsBranchSwitch = false;
     let createNewBranch = false;
-    if (needsBranchSwitch) {
-        const branchesResult = await listBranches(repoPath);
-        const branches = branchesResult.success ? branchesResult.data || [] : [];
-        createNewBranch = !branches.includes(targetBranch);
+    
+    if (!quickMode) {
+        terminal.writeLine('');
+        const branchInput = await terminal.input('Push to branch', currentBranch);
+        targetBranch = branchInput;
+        needsBranchSwitch = targetBranch !== currentBranch;
         
-        if (createNewBranch) {
-            terminal.showInfo(`Will create new branch: ${targetBranch}`);
-        } else {
-            terminal.showInfo(`Will switch to existing branch: ${targetBranch}`);
+        // Validate target branch (check if it exists or will be created)
+        if (needsBranchSwitch) {
+            const branchesResult = await listBranches(repoPath);
+            const branches = branchesResult.success ? branchesResult.data || [] : [];
+            createNewBranch = !branches.includes(targetBranch);
+            
+            if (createNewBranch) {
+                terminal.showInfo(`Will create new branch: ${targetBranch}`);
+            } else {
+                terminal.showInfo(`Will switch to existing branch: ${targetBranch}`);
+            }
         }
     }
     
@@ -181,9 +190,11 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
         }
     }
     
-    // Step 7: Get/confirm commit message
-    const messageInput = await terminal.input('Commit message', commitMessage || 'Update files');
-    commitMessage = messageInput;
+    // Step 7: Get/confirm commit message (skip in quick mode if AI message exists)
+    if (!quickMode || !commitMessage) {
+        const messageInput = await terminal.input('Commit message', commitMessage || 'Update files');
+        commitMessage = messageInput;
+    }
     
     if (!commitMessage) {
         terminal.showError('Commit message cannot be empty');
@@ -221,12 +232,15 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
     terminal.showInfo(`Message: ${commitMessage}`);
     terminal.writeLine('');
     
-    const confirmed = await terminal.confirm('Proceed with commit and push', true);
-    
-    if (!confirmed) {
-        terminal.showError('Cancelled');
-        terminal.close();
-        return;
+    // Skip confirmation in quick mode
+    if (!quickMode) {
+        const confirmed = await terminal.confirm('Proceed with commit and push', true);
+        
+        if (!confirmed) {
+            terminal.showError('Cancelled');
+            terminal.close();
+            return;
+        }
     }
     
     terminal.separator();

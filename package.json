@@ -62,8 +62,8 @@
       },
       {
         "command": "autogit-pro.quickCommit",
-        "key": "ctrl+alt+q",
-        "mac": "cmd+alt+q"
+        "key": "ctrl+shift+alt+c",
+        "mac": "cmd+shift+alt+c"
       }
     ],
     "configuration": {

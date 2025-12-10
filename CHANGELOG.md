@@ -4,6 +4,17 @@ All notable changes to AutoGit Pro will be documented in this file.
 
 ## [1.0.3] - 2025-12-10
 
+### Added
+
+- ⚡ **Quick Mode** for Quick Commit command - skips prompts for faster workflow
+  - Uses AI-generated message directly without confirmation
+  - Stays on current branch (no branch selection prompt)
+  - Skips final confirmation for instant commit & push
+
+### Changed
+
+- ⌨️ Updated Quick Commit shortcut to `Ctrl+Shift+Alt+C` (avoids conflicts)
+
 ### Fixed
 
 - 🔧 Fixed "uncommitted changes would be overwritten" error when pushing to different branch

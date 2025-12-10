@@ -44,7 +44,7 @@ Press **`Ctrl+Alt+G`** and follow the prompts!
 | Command | Shortcut | Description |
 |---------|----------|-------------|
 | Commit & Push | `Ctrl+Alt+G` | Full interactive workflow |
-| Quick Commit | `Ctrl+Alt+Q` | AI-first quick commit |
+| Quick Commit | `Ctrl+Shift+Alt+C` | ⚡ Fast mode: AI message, no prompts |
 
 ## 📋 Workflow Demo
 
