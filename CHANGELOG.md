@@ -2,6 +2,17 @@
 
 All notable changes to AutoGit Pro will be documented in this file.
 
+## [1.0.3] - 2025-12-10
+
+### Fixed
+
+- 🔧 Fixed "uncommitted changes would be overwritten" error when pushing to different branch
+- 🔄 Reordered workflow: now commits changes first, then switches branches safely
+- 📝 Improved branch selection UI with "Push to branch" prompt
+- ℹ️ Better feedback showing current branch and target branch during confirmation
+
+---
+
 ## [1.0.1] - 2025-12-08
 
 ### Added

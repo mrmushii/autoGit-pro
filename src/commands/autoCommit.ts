@@ -137,34 +137,24 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
     terminal.showInfo(`Changes: ${status.staged.length} staged, ${status.unstaged.length} modified, ${status.untracked.length} new`);
     terminal.separator();
     
-    // Step 5: Branch selection
+    // Step 5: Target branch selection (we'll switch AFTER committing if needed)
     terminal.writeLine('');
-    const branchInput = await terminal.input('Branch', currentBranch);
+    const branchInput = await terminal.input('Push to branch', currentBranch);
+    const targetBranch = branchInput;
+    const needsBranchSwitch = targetBranch !== currentBranch;
     
-    if (branchInput !== currentBranch) {
+    // Validate target branch (check if it exists or will be created)
+    let createNewBranch = false;
+    if (needsBranchSwitch) {
         const branchesResult = await listBranches(repoPath);
         const branches = branchesResult.success ? branchesResult.data || [] : [];
+        createNewBranch = !branches.includes(targetBranch);
         
-        if (branches.includes(branchInput)) {
-            terminal.showProgress(`Switching to branch: ${branchInput}`);
-            const checkoutResult = await checkoutBranch(repoPath, branchInput);
-            if (!checkoutResult.success) {
-                terminal.showError(checkoutResult.error || 'Failed to switch branch');
-                terminal.close();
-                return;
-            }
-            terminal.showSuccess(`Switched to ${branchInput}`);
+        if (createNewBranch) {
+            terminal.showInfo(`Will create new branch: ${targetBranch}`);
         } else {
-            terminal.showProgress(`Creating new branch: ${branchInput}`);
-            const createResult = await createBranch(repoPath, branchInput);
-            if (!createResult.success) {
-                terminal.showError(createResult.error || 'Failed to create branch');
-                terminal.close();
-                return;
-            }
-            terminal.showSuccess(`Created and switched to ${branchInput}`);
+            terminal.showInfo(`Will switch to existing branch: ${targetBranch}`);
         }
-        currentBranch = branchInput;
     }
     
     // Step 6: Generate AI commit message
@@ -224,7 +214,10 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
     // Step 9: Confirm and execute
     terminal.separator();
     terminal.writeLine('');
-    terminal.showInfo(`Branch: ${currentBranch}`);
+    terminal.showInfo(`Current branch: ${currentBranch}`);
+    if (needsBranchSwitch) {
+        terminal.showInfo(`Target branch: ${targetBranch}${createNewBranch ? ' (new)' : ''}`);
+    }
     terminal.showInfo(`Message: ${commitMessage}`);
     terminal.writeLine('');
     
@@ -260,19 +253,48 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
     }
     terminal.showSuccess('Commit created');
     
-    // Step 12: Push
+    // Step 12: Branch switch (if needed) - NOW safe because changes are committed
+    let pushBranch = currentBranch;
+    if (needsBranchSwitch) {
+        if (createNewBranch) {
+            terminal.showProgress(`Creating new branch: ${targetBranch}`);
+            const createResult = await createBranch(repoPath, targetBranch);
+            if (!createResult.success) {
+                terminal.showError(createResult.error || 'Failed to create branch');
+                terminal.showInfo('Commit was created on current branch. You can switch manually.');
+                terminal.close();
+                return;
+            }
+            terminal.showSuccess(`Created and switched to ${targetBranch}`);
+            pushBranch = targetBranch;
+        } else {
+            // Switch to existing branch and cherry-pick the commit
+            terminal.showProgress(`Switching to branch: ${targetBranch}`);
+            const checkoutResult = await checkoutBranch(repoPath, targetBranch);
+            if (!checkoutResult.success) {
+                terminal.showError(checkoutResult.error || 'Failed to switch branch');
+                terminal.showInfo('Commit was created on current branch. You can switch manually.');
+                terminal.close();
+                return;
+            }
+            terminal.showSuccess(`Switched to ${targetBranch}`);
+            pushBranch = targetBranch;
+        }
+    }
+    
+    // Step 13: Push
     const shouldPush = config.pushAfterCommit && await hasRemote(repoPath, remoteName);
     
     if (shouldPush) {
-        terminal.showProgress(`Pushing to ${remoteName}/${currentBranch}`);
-        const upstreamSet = await hasUpstream(repoPath, currentBranch);
-        let pushResult = await push(repoPath, remoteName, currentBranch, !upstreamSet);
+        terminal.showProgress(`Pushing to ${remoteName}/${pushBranch}`);
+        const upstreamSet = await hasUpstream(repoPath, pushBranch);
+        let pushResult = await push(repoPath, remoteName, pushBranch, !upstreamSet);
         
         // If push failed, try pulling first
         if (!pushResult.success && pushResult.error?.includes('rejected')) {
             terminal.showInfo('Remote has new changes. Pulling first...');
             terminal.showProgress('Pulling from remote');
-            const pullResult = await pull(repoPath, remoteName, currentBranch, true);
+            const pullResult = await pull(repoPath, remoteName, pushBranch, true);
             
             if (!pullResult.success) {
                 terminal.showError(pullResult.error || 'Failed to pull. Please resolve conflicts manually.');
@@ -282,8 +304,8 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
             terminal.showSuccess('Pulled successfully');
             
             // Retry push
-            terminal.showProgress(`Pushing to ${remoteName}/${currentBranch}`);
-            pushResult = await push(repoPath, remoteName, currentBranch, false);
+            terminal.showProgress(`Pushing to ${remoteName}/${pushBranch}`);
+            pushResult = await push(repoPath, remoteName, pushBranch, false);
         }
         
         if (!pushResult.success) {
@@ -291,7 +313,7 @@ async function runWorkflow(terminal: TerminalWorkflow, _quickMode: boolean): Pro
             terminal.close();
             return;
         }
-        terminal.showSuccess(`Pushed to ${remoteName}/${currentBranch}`);
+        terminal.showSuccess(`Pushed to ${remoteName}/${pushBranch}`);
     }
     
     // Done!
