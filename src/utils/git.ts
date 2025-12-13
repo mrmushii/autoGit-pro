@@ -3,48 +3,77 @@
  * Core Git operations using child process execution
  */
 
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
 import type { GitOperationResult, GitRemote, GitStatus, GitDiffContext } from '../types';
 
-const execAsync = promisify(exec);
 
 /**
- * Execute a Git command in the specified directory
+ * Execute a Git command in the specified directory using spawn.
+ * This avoids shell escaping issues by passing arguments as an array.
  */
 async function executeGit(cwd: string, args: string): Promise<GitOperationResult<string>> {
-    try {
-        const { stdout } = await execAsync(`git ${args}`, {
-            cwd,
-            maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large diffs
-            encoding: 'utf-8',
-        });
-        
-        // Some commands output to stderr even on success
-        return {
-            success: true,
-            data: stdout.trim(),
-        };
-    } catch (error) {
-        const execError = error as { stderr?: string; message?: string };
-        return {
-            success: false,
-            error: execError.stderr?.trim() || execError.message || 'Unknown Git error',
-        };
-    }
+    // Split the args string into an array for spawn
+    // This is a simple split; complex args should use executeGitWithArgs directly
+    const argsArray = args.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+    // Remove quotes from args
+    const cleanArgs = argsArray.map(arg => arg.replace(/^"|"$/g, '').replace(/^'|'$/g, ''));
+    return executeGitWithArgs(cwd, cleanArgs);
 }
+
+/**
+ * Execute a Git command with explicit argument array (safer for special characters).
+ */
+async function executeGitWithArgs(cwd: string, args: string[]): Promise<GitOperationResult<string>> {
+    return new Promise((resolve) => {
+        const child = spawn('git', args, {
+            cwd,
+            shell: false, // Important: no shell interpolation
+        });
+
+        let stdout = '';
+        let stderr = '';
+
+        child.stdout.on('data', (data: Buffer) => {
+            stdout += data.toString();
+        });
+
+        child.stderr.on('data', (data: Buffer) => {
+            stderr += data.toString();
+        });
+
+
+        child.on('close', (code) => {
+            if (code === 0) {
+                resolve({
+                    success: true,
+                    data: stdout.trim(),
+                });
+            } else {
+                resolve({
+                    success: false,
+                    error: stderr.trim() || `Git command failed with code ${code}`,
+                });
+            }
+        });
+
+        child.on('error', (err) => {
+            resolve({
+                success: false,
+                error: err.message || 'Failed to execute git command',
+            });
+        });
+    });
+}
+
 
 /**
  * Check if Git is installed and available
  */
 export async function isGitInstalled(): Promise<boolean> {
-    try {
-        await execAsync('git --version');
-        return true;
-    } catch {
-        return false;
-    }
+    const result = await executeGitWithArgs('.', ['--version']);
+    return result.success;
 }
+
 
 /**
  * Check if the directory is inside a Git work tree
@@ -286,28 +315,20 @@ export async function commit(cwd: string, message: string): Promise<GitOperation
             error: 'Commit message cannot be empty',
         };
     }
-    
-    // Escape special characters for shell safety
-    // Replace backticks, dollar signs, and escape quotes
-    const escapedMessage = message
-        .replace(/\\/g, '\\\\')     // Escape backslashes first
-        .replace(/"/g, '\\"')       // Escape double quotes
-        .replace(/`/g, '\\`')       // Escape backticks
-        .replace(/\$/g, '\\$')      // Escape dollar signs
-        .replace(/\n/g, ' ')        // Replace newlines with space
-        .trim();
-    
-    const result = await executeGit(cwd, `commit -m "${escapedMessage}"`);
-    
+
+    // Use executeGitWithArgs to safely pass the message without shell escaping
+    const result = await executeGitWithArgs(cwd, ['commit', '-m', message.trim()]);
+
     if (result.success) {
         return result;
     }
-    
+
     return {
         success: false,
         error: result.error || 'Failed to create commit',
     };
 }
+
 
 /**
  * Push to remote
@@ -467,18 +488,34 @@ export async function pull(
     cwd: string,
     remote: string = 'origin',
     branch: string = '',
-    rebase: boolean = false
-): Promise<GitOperationResult<void>> {
-    const rebaseFlag = rebase ? '--rebase' : '';
-    const branchArg = branch ? `${remote} ${branch}` : remote;
-    const result = await executeGit(cwd, `pull ${rebaseFlag} ${branchArg}`.trim());
+    rebase: boolean = false,
+    allowUnrelatedHistories: boolean = false
+): Promise<GitOperationResult<string>> {
+    const args: string[] = ['pull'];
     
-    if (result.success) {
-        return { success: true };
+    if (rebase) {
+        args.push('--rebase');
     }
     
+    if (allowUnrelatedHistories) {
+        args.push('--allow-unrelated-histories');
+    }
+    
+    args.push(remote);
+    
+    if (branch) {
+        args.push(branch);
+    }
+    
+    const result = await executeGitWithArgs(cwd, args);
+
+    if (result.success) {
+        return { success: true, data: result.data };
+    }
+
     return {
         success: false,
         error: result.error || 'Failed to pull from remote',
     };
 }
+
