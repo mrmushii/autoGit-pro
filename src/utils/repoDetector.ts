@@ -9,7 +9,7 @@ import { isInsideWorkTree, getRepositoryRoot } from './git';
 
 /**
  * Detect the active repository based on current context
- * Priority: Active editor > First workspace folder
+ * Priority: Active editor > User selection from all workspace repos
  */
 export async function detectRepository(): Promise<string | undefined> {
     // Try to get repository from active editor
@@ -24,20 +24,33 @@ export async function detectRepository(): Promise<string | undefined> {
         }
     }
     
-    // Fall back to first workspace folder
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (workspaceFolders && workspaceFolders.length > 0) {
-        for (const folder of workspaceFolders) {
-            const folderPath = folder.uri.fsPath;
-            const repoResult = await getRepositoryRoot(folderPath);
-            if (repoResult.success && repoResult.data) {
-                return repoResult.data;
-            }
-        }
+    // Fall back to workspace repositories
+    // If multiple are found, prompt user to select
+    const repositories = await getWorkspaceRepositories();
+    
+    if (repositories.length === 0) {
+        return undefined;
     }
     
-    return undefined;
+    if (repositories.length === 1) {
+        return repositories[0];
+    }
+    
+    // Multiple repos found - prompt user to select
+    const items = repositories.map(repo => ({
+        label: path.basename(repo),
+        description: repo,
+        path: repo,
+    }));
+    
+    const selected = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Select a repository to commit to',
+        title: 'AutoGit Pro: Multiple Repositories Found',
+    });
+    
+    return selected?.path;
 }
+
 
 /**
  * Get the first workspace folder path (even if not a git repo)
@@ -86,7 +99,7 @@ export async function selectRepository(): Promise<string | undefined> {
     const repositories = await getWorkspaceRepositories();
     
     if (repositories.length === 0) {
-        vscode.window.showErrorMessage('AutoGit Pro: No Git repository found in workspace');
+        void vscode.window.showErrorMessage('AutoGit Pro: No Git repository found in workspace');
         return undefined;
     }
     
