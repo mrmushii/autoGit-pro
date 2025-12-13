@@ -2,7 +2,32 @@
 
 All notable changes to AutoGit Pro will be documented in this file.
 
+## [1.1.0] - 2025-12-13
+
+### Added
+
+- 🔄 **Auto Pull Command** - New `AutoGit Pro: Pull from Remote` command
+  - Keyboard shortcut: `Ctrl+Shift+Alt+P` (Windows) / `Cmd+Shift+Alt+P` (Mac)
+  - Select remote and branch to pull from
+  - Automatic conflict detection with Source Control handover
+
+### Changed
+
+- 🔐 **Security**: Removed hardcoded API key - users must now configure their own
+- ⚙️ **Reliability**: Refactored Git commands to use `spawn` instead of `exec` for safer argument handling
+- 🔀 **UX**: Multi-repo workspaces now prompt for repository selection instead of defaulting to first
+
+### Fixed
+
+- 🌿 **Unrelated Histories**: Pushing to GitHub repos initialized with README now works automatically
+- ⚠️ **Conflict Handling**: Merge conflicts now gracefully open the Source Control view
+- 🖥️ **Terminal Persistence**: Errors no longer auto-close the terminal - users can read what went wrong
+- 📝 **Commit Messages**: Special characters in messages no longer break the commit
+
+---
+
 ## [1.0.3] - 2025-12-10
+
 
 ### Added
 
