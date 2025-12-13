@@ -3,113 +3,248 @@
 > **One-click Git workflow automation with AI-powered commit messages**
 
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue.svg)](https://code.visualstudio.com/)
+[![Version](https://img.shields.io/badge/Version-1.1.0-brightgreen.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+<!-- 
+📸 SCREENSHOT GUIDELINES:
+Place your screenshots in an 'images' folder at the project root.
+Recommended screenshots:
+1. images/demo-commit.gif - Animated GIF showing the commit workflow
+2. images/demo-sync.gif - Animated GIF showing the sync/pull workflow  
+3. images/settings.png - Screenshot of VS Code settings panel
+4. images/conflict-handling.png - Screenshot of conflict detection
+
+To capture:
+- Use VS Code's built-in screen recorder or tools like ScreenToGif
+- Keep GIFs under 10MB for good loading times
+- Use 1280x720 or similar resolution
+-->
+
+<!-- Uncomment when you have screenshots:
+![AutoGit Pro Demo](images/demo-commit.gif)
+-->
+
+---
 
 ## ✨ Features
 
-- 🚀 **One-Click Commit & Push** — Stage, commit, and push with a single shortcut
-- 🤖 **AI Commit Messages** — Auto-generate meaningful commits using Groq (FREE), OpenAI, or Gemini
-- 📁 **Auto-Initialize Repos** — No Git? Provide a GitHub URL and we'll set it up
-- 🌿 **Branch Management** — Switch or create branches inline
-- 🔄 **Smart Sync** — Auto-pull when remote has new commits
-- 🔧 **Terminal-Based UI** — Clean, interactive workflow
+### 🚀 One-Click Commit & Push
+Stage, commit, and push all your changes with a single keyboard shortcut. No more switching between terminal and editor.
+
+### 🤖 AI-Powered Commit Messages
+Let AI analyze your changes and generate meaningful, conventional commit messages. Supports:
+- **Groq** (FREE - Recommended!)
+- **OpenAI** (GPT-4)
+- **Google Gemini**
+
+### 🔄 Full Git Sync
+New in v1.1.0! Pull remote changes AND push local commits in one action. Perfect for team collaboration.
+
+### ⚡ Quick Mode
+Skip all prompts and commit instantly with AI-generated messages. Ideal for rapid iteration.
+
+### 🛡️ Smart Error Handling
+- Automatic conflict detection with Source Control handover
+- Handles "unrelated histories" when pushing to new GitHub repos
+- Terminal stays open on errors so you can read what went wrong
+
+---
 
 ## 🎯 Quick Start
 
-### 1. Install
+### Step 1: Install
 
-Search for **"AutoGit Pro"** in VS Code Extensions.
+Search for **"AutoGit Pro"** in VS Code Extensions, or:
 
-### 2. Get FREE API Key (Recommended)
+```bash
+code --install-extension autogit-pro.autogit-pro
+```
 
-For AI commit messages, get a free Groq API key:
+### Step 2: Get a FREE API Key
+
+For AI commit messages, get a free Groq API key (no credit card needed):
 
 1. Go to [console.groq.com](https://console.groq.com)
-2. Create account (no credit card needed)
+2. Create an account
 3. Generate an API key
 
-### 3. Configure
+### Step 3: Configure
 
-Open VS Code Settings (`Ctrl+,`) → search "autogit-pro":
+1. Open VS Code Settings (`Ctrl+,` or `Cmd+,`)
+2. Search for "autogit-pro"
+3. Set **AI Provider** to `groq`
+4. Paste your **Groq API Key**
 
-- Set **AI Provider** to `groq`
-- Paste your **Groq API Key**
+<!-- Uncomment when you have screenshot:
+![Settings Screenshot](images/settings.png)
+-->
 
-### 4. Use It
+### Step 4: Use It!
 
-Press **`Ctrl+Alt+G`** and follow the prompts!
+Press **`Ctrl+Alt+G`** (Windows/Linux) or **`Cmd+Alt+G`** (Mac) and follow the prompts!
+
+---
 
 ## ⌨️ Keyboard Shortcuts
 
-| Command | Shortcut | Description |
-|---------|----------|-------------|
-| Commit & Push | `Ctrl+Alt+G` | Full interactive workflow |
-| Quick Commit | `Ctrl+Shift+Alt+C` | ⚡ Fast mode: AI message, no prompts |
+| Command | Windows/Linux | Mac | Description |
+|---------|---------------|-----|-------------|
+| **Commit & Push** | `Ctrl+Alt+G` | `Cmd+Alt+G` | Full interactive workflow with prompts |
+| **Quick Commit** | `Ctrl+Shift+Alt+C` | `Cmd+Shift+Alt+C` | ⚡ Instant commit with AI message (no prompts) |
+| **Sync (Pull & Push)** | `Ctrl+Shift+Alt+P` | `Cmd+Shift+Alt+P` | 🔄 Pull remote + push local commits |
 
-## 📋 Workflow Demo
+---
 
-```text
- AutoGit Pro - Commit & Push 
+## 📋 Workflow Examples
+
+### Standard Commit & Push
+
+```
+╔══════════════════════════════════════════╗
+║  AutoGit Pro - Commit & Push             ║
+╚══════════════════════════════════════════╝
 
 ✓ Git is available
 ✓ Repository: D:\Projects\my-app
 ℹ Current branch: main
-ℹ Changes: 2 modified, 1 new
-──────────────────────────────────────
-▸ Branch [main]: 
+ℹ Changes: 2 staged, 1 modified, 3 new
+──────────────────────────────────────────────
+▸ Push to branch [main]: 
 ⟳ Generating AI commit message...
-✓ AI generated: feat: add user authentication
-▸ Commit message [feat: add user authentication]: 
+✓ AI generated commit message:
+  feat: add user authentication with JWT tokens
+▸ Commit message [feat: add user authentication...]: 
+──────────────────────────────────────────────
+ℹ Current branch: main
+ℹ Message: feat: add user authentication with JWT tokens
 ▸ Proceed with commit and push [Y/n]: 
-──────────────────────────────────────
+──────────────────────────────────────────────
 ✓ Changes staged
 ✓ Commit created
 ✓ Pushed to origin/main
-✓ ✨ All done!
+✨ All done! Commit and push completed successfully.
 ```
 
-**Press Enter** to accept defaults — it's that simple!
+### Sync (Pull & Push)
 
-## 🤖 AI Providers
+```
+╔══════════════════════════════════════════╗
+║  AutoGit Pro - Commit & Push             ║
+╚══════════════════════════════════════════╝
 
-| Provider | Cost | Speed | Get Key |
-|----------|------|-------|---------|
-| **Groq** | FREE | ⚡ Fast | [console.groq.com](https://console.groq.com) |
-| OpenAI | Paid | Fast | [platform.openai.com](https://platform.openai.com) |
-| Gemini | Free tier | Fast | [aistudio.google.com](https://aistudio.google.com) |
+✓ Git is available
+✓ Repository: D:\Projects\my-app
+✓ Working directory is clean
+ℹ Current branch: feature-branch
+✓ Found 1 remote(s): origin
+──────────────────────────────────────────────
+⟳ Fetching from origin...
+✓ Fetch complete
+▸ Pull branch [feature-branch]: 
+──────────────────────────────────────────────
+ℹ Will pull from: origin/feature-branch
+ℹ Into local branch: feature-branch
+▸ Proceed with pull [Y/n]: 
+──────────────────────────────────────────────
+✓ Pull completed successfully!
+✓ Pushed local commits to origin/feature-branch
+✨ All done! Pull and push completed successfully.
+```
 
-## ⚙️ Settings
+---
+
+## 🤖 AI Providers Comparison
+
+| Provider | Cost | Speed | Best For |
+|----------|------|-------|----------|
+| **Groq** ⭐ | FREE | ⚡ Fastest | Everyone (Recommended!) |
+| OpenAI | Paid ($) | Fast | Enterprise with existing OpenAI usage |
+| Gemini | Free tier | Fast | Google Cloud users |
+
+### Getting API Keys
+
+- **Groq**: [console.groq.com](https://console.groq.com) - Free, no credit card
+- **OpenAI**: [platform.openai.com](https://platform.openai.com) - Requires payment method
+- **Gemini**: [aistudio.google.com](https://aistudio.google.com) - Free tier available
+
+---
+
+## ⚙️ All Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `aiProvider` | `groq` | AI provider (groq/openai/gemini/none) |
-| `groqApiKey` | — | Your Groq API key |
-| `autoStageAll` | `true` | Auto-stage all changes |
-| `pushAfterCommit` | `true` | Auto-push after commit |
-| `confirmBeforePush` | `true` | Confirm before pushing |
+| `autogit-pro.aiProvider` | `groq` | AI provider: `groq`, `openai`, `gemini`, or `none` |
+| `autogit-pro.groqApiKey` | — | Your Groq API key |
+| `autogit-pro.groqModel` | `llama-3.1-8b-instant` | Groq model to use |
+| `autogit-pro.openaiApiKey` | — | Your OpenAI API key |
+| `autogit-pro.openaiModel` | `gpt-4o-mini` | OpenAI model to use |
+| `autogit-pro.geminiApiKey` | — | Your Gemini API key |
+| `autogit-pro.geminiModel` | `gemini-2.0-flash-001` | Gemini model to use |
+| `autogit-pro.defaultRemote` | `origin` | Default remote for push/pull |
+| `autogit-pro.autoStageAll` | `true` | Automatically stage all changes |
+| `autogit-pro.pushAfterCommit` | `true` | Automatically push after commit |
+| `autogit-pro.confirmBeforePush` | `true` | Show confirmation before pushing |
 
-## 🆕 New Repo Setup
+---
 
-Open a folder without Git initialized:
+## 🆕 New Repository Setup
 
-1. Extension prompts for GitHub repo URL
-2. Runs `git init -b main`
-3. Adds remote origin
-4. Ready to commit!
+Don't have Git initialized? No problem!
 
-## 📦 Requirements
+1. Open a folder without `.git`
+2. Run **Commit & Push** (`Ctrl+Alt+G`)
+3. Enter your GitHub repository URL when prompted
+4. Extension runs `git init -b main` and adds remote
+5. Ready to commit!
 
-- VS Code 1.85+
-- Git installed and in PATH
-- (Optional) API key for AI commits
+---
 
 ## 🔧 Troubleshooting
 
-**"Git not found"** — Install Git and add to PATH
+### "Git not found"
+- Install Git from [git-scm.com](https://git-scm.com)
+- Ensure Git is in your system PATH
+- Restart VS Code after installation
 
-**"AI failed"** — Check API key and internet connection
+### "AI generation failed"
+- Check your API key is correct
+- Verify internet connection
+- Try a different AI provider
 
-**"Push rejected"** — Extension auto-pulls and retries
+### "Push rejected"
+- Extension automatically pulls and retries
+- If conflicts exist, Source Control view opens automatically
+
+### "Unrelated histories" error
+- Fixed in v1.1.0! Extension now handles this automatically
+- Occurs when remote repo was initialized with README
+
+### Terminal closes too fast
+- Fixed in v1.1.0! Terminal now stays open on errors
+
+---
+
+## 📦 Requirements
+
+- **VS Code** 1.85 or higher
+- **Git** installed and in PATH
+- **API Key** (optional) for AI commit messages
+
+---
+
+## 🔄 What's New in v1.1.0
+
+- 🔄 **Sync Command** - Pull + Push in one action
+- 🔐 **Security** - Removed hardcoded API keys
+- 🌿 **Unrelated Histories** - Fixed GitHub repo with README issue
+- ⚠️ **Conflict Handling** - Opens Source Control on conflicts
+- 🖥️ **Error Visibility** - Terminal stays open on errors
+- 📝 **Special Characters** - Commit messages with quotes/symbols work
+
+See [CHANGELOG.md](CHANGELOG.md) for full history.
+
+---
 
 ## 👨‍💻 Developer
 
@@ -119,10 +254,27 @@ Open a folder without Git initialized:
 - 💼 LinkedIn: [Mushfiqur Rahman](https://www.linkedin.com/in/mushfiqur-rahman-7bb295289/)
 - 🌐 Portfolio: [my-portfolio-eight-phi-80.vercel.app](https://my-portfolio-eight-phi-80.vercel.app/)
 
+---
+
 ## 📄 License
 
 MIT License © 2025 Mushfiqur Rahman
 
+See [LICENSE](LICENSE) for details.
+
+---
+
+## 🙏 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
 ---
 
 **Made with ❤️ by Mushfiqur Rahman**
+
+*Star ⭐ this repo if you find it useful!*

@@ -6,10 +6,12 @@ All notable changes to AutoGit Pro will be documented in this file.
 
 ### Added
 
-- 🔄 **Auto Pull Command** - New `AutoGit Pro: Pull from Remote` command
+- 🔄 **Auto Sync Command** - New `AutoGit Pro: Pull from Remote` command
   - Keyboard shortcut: `Ctrl+Shift+Alt+P` (Windows) / `Cmd+Shift+Alt+P` (Mac)
-  - Select remote and branch to pull from
+  - **Full Sync**: Pulls remote changes AND pushes local commits in one action
+  - Select remote and branch to sync with
   - Automatic conflict detection with Source Control handover
+
 
 ### Changed
 

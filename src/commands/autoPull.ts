@@ -11,9 +11,12 @@ import {
     getCurrentBranch,
     getRemotes,
     pull,
+    push,
     getStatus,
     fetch,
+    hasUpstream,
 } from '../utils/git';
+
 import { TerminalWorkflow } from '../ui/terminal';
 
 /**
@@ -173,9 +176,27 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
         }
     }
     
+    // Step 11: Push local commits if any exist
+    terminal.separator();
+    terminal.showProgress('Checking for local commits to push');
+    
+    // Try to push - if there are commits ahead, this will push them
+    const upstreamSet = await hasUpstream(repoPath, currentBranch);
+    const pushResult = await push(repoPath, selectedRemote, currentBranch, !upstreamSet);
+    
+    if (pushResult.success) {
+        terminal.showSuccess(`Pushed local commits to ${selectedRemote}/${currentBranch}`);
+    } else if (pushResult.error?.includes('Everything up-to-date')) {
+        terminal.showInfo('No local commits to push - already up to date');
+    } else {
+        terminal.showError(pushResult.error || 'Failed to push local commits');
+        terminal.showInfo('You may need to push manually: git push');
+        return;
+    }
+    
     terminal.separator();
     terminal.writeLine('');
-    terminal.showSuccess('✨ All done! Pull completed successfully.');
+    terminal.showSuccess('✨ All done! Pull and push completed successfully.');
     terminal.writeLine('');
     terminal.showInfo('Terminal will close in 3 seconds...');
     
@@ -184,3 +205,4 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
         terminal.closeImmediately();
     }, 3000);
 }
+
