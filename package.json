@@ -40,8 +40,10 @@
   },
   "activationEvents": [
     "onCommand:autogit-pro.commit",
-    "onCommand:autogit-pro.quickCommit"
+    "onCommand:autogit-pro.quickCommit",
+    "onCommand:autogit-pro.pull"
   ],
+
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -52,8 +54,13 @@
       {
         "command": "autogit-pro.quickCommit",
         "title": "AutoGit Pro: Quick Commit (AI Message)"
+      },
+      {
+        "command": "autogit-pro.pull",
+        "title": "AutoGit Pro: Pull from Remote"
       }
     ],
+
     "keybindings": [
       {
         "command": "autogit-pro.commit",
@@ -64,8 +71,14 @@
         "command": "autogit-pro.quickCommit",
         "key": "ctrl+shift+alt+c",
         "mac": "cmd+shift+alt+c"
+      },
+      {
+        "command": "autogit-pro.pull",
+        "key": "ctrl+shift+alt+p",
+        "mac": "cmd+shift+alt+p"
       }
     ],
+
     "configuration": {
       "title": "AutoGit Pro",
       "properties": {

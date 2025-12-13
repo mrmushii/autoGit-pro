@@ -8,7 +8,9 @@
 
 import * as vscode from 'vscode';
 import { executeAutoCommit } from './commands/autoCommit';
+import { executeAutoPull } from './commands/autoPull';
 import { isGitInstalled } from './utils/git';
+
 
 /**
  * Extension activation
@@ -20,10 +22,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Verify Git is available
     const gitAvailable = await isGitInstalled();
     if (!gitAvailable) {
-        vscode.window.showWarningMessage(
+        void vscode.window.showWarningMessage(
             'AutoGit Pro: Git is not installed or not in PATH. Some features may not work.'
         );
     }
+
     
     // Register the main commit command
     const commitCommand = vscode.commands.registerCommand(
@@ -56,6 +59,22 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Add commands to subscriptions for cleanup
     context.subscriptions.push(commitCommand);
     context.subscriptions.push(quickCommitCommand);
+    
+    // Register the pull command
+    const pullCommand = vscode.commands.registerCommand(
+        'autogit-pro.pull',
+        async () => {
+            try {
+                await executeAutoPull();
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Unknown error';
+                vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
+                console.error('AutoGit Pro Error:', error);
+            }
+        }
+    );
+    context.subscriptions.push(pullCommand);
+
     
     // Show welcome message on first activation
     const hasShownWelcome = context.globalState.get<boolean>('autogit-pro.welcomeShown');
