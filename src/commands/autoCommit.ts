@@ -1,8 +1,4 @@
-/**
- * AutoGit Pro - Auto Commit Command (Terminal Version)
- * Terminal-based workflow for commit & push
- */
-
+import * as vscode from 'vscode';
 import { getExtensionConfig, type AIProviderConfig, type ExtensionConfig } from '../types';
 import { detectRepository, getWorkspaceFolderPath } from '../utils/repoDetector';
 import {
@@ -25,8 +21,6 @@ import {
 import { generateCommitMessage, validateAIConfig } from '../utils/ai';
 import { TerminalWorkflow } from '../ui/terminal';
 
-// Default Gemini API key (user can override in settings)
-const DEFAULT_GEMINI_API_KEY = 'AIzaSyD4BEiEgsp5lMZUrJOOI9ORMBy69WUoPp4';
 
 /**
  * Execute the AutoGit Pro workflow in terminal
@@ -39,9 +33,11 @@ export async function executeAutoCommit(quickMode: boolean = false): Promise<voi
         await runWorkflow(terminal, quickMode);
     } catch (err) {
         terminal.showError(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-        terminal.close();
+        terminal.showInfo('Terminal will remain open. Close it manually when ready.');
+        // Don't close terminal on error - let user read the error
     }
 }
+
 
 /**
  * Main workflow logic
@@ -58,10 +54,11 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
     const gitInstalled = await isGitInstalled();
     if (!gitInstalled) {
         terminal.showError('Git is not installed or not in PATH');
-        terminal.close();
+        terminal.showInfo('Please install Git and try again.');
         return;
     }
     terminal.showSuccess('Git is available');
+
     
     // Step 2: Detect repository (or initialize new one)
     terminal.showProgress('Detecting repository');
@@ -72,9 +69,9 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
         const workspacePath = getWorkspaceFolderPath();
         if (!workspacePath) {
             terminal.showError('No folder open. Please open a folder first.');
-            terminal.close();
             return;
         }
+
         
         terminal.showInfo('No Git repository found in this folder.');
         terminal.writeLine('');
@@ -82,29 +79,29 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
         
         if (!repoUrl) {
             terminal.showError('No repository URL provided. Exiting.');
-            terminal.close();
             return;
         }
+
         
         // Initialize git
         terminal.showProgress('Initializing Git repository');
         const initResult = await initRepository(workspacePath);
         if (!initResult.success) {
             terminal.showError(initResult.error || 'Failed to initialize repository');
-            terminal.close();
             return;
         }
         terminal.showSuccess('Git repository initialized');
+
         
         // Add remote
         terminal.showProgress('Adding remote origin');
         const addRemoteResult = await addRemote(workspacePath, 'origin', repoUrl);
         if (!addRemoteResult.success) {
             terminal.showError(addRemoteResult.error || 'Failed to add remote');
-            terminal.close();
             return;
         }
         terminal.showSuccess(`Remote added: ${repoUrl}`);
+
         
         repoPath = workspacePath;
     }
@@ -123,19 +120,18 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
         terminal.showInfo(`Current branch: ${currentBranch}`);
     }
     
-    // Step 4: Check for changes
     const statusResult = await getStatus(repoPath);
     if (!statusResult.success || !statusResult.data) {
         terminal.showError(statusResult.error || 'Failed to get repository status');
-        terminal.close();
         return;
     }
     
     if (!statusResult.data.hasChanges) {
-        terminal.showError('No changes to commit');
+        terminal.showInfo('No changes to commit. Working tree clean.');
         terminal.close();
         return;
     }
+
     
     const status = statusResult.data;
     terminal.showInfo(`Changes: ${status.staged.length} staged, ${status.unstaged.length} modified, ${status.untracked.length} new`);
@@ -198,9 +194,9 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
     
     if (!commitMessage) {
         terminal.showError('Commit message cannot be empty');
-        terminal.close();
         return;
     }
+
     
     // Step 8: Check remote
     terminal.separator();
@@ -237,10 +233,11 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
         const confirmed = await terminal.confirm('Proceed with commit and push', true);
         
         if (!confirmed) {
-            terminal.showError('Cancelled');
+            terminal.showInfo('Cancelled by user.');
             terminal.close();
             return;
         }
+
     }
     
     terminal.separator();
@@ -251,10 +248,10 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
         const stageResult = await stageAll(repoPath);
         if (!stageResult.success) {
             terminal.showError(stageResult.error || 'Failed to stage changes');
-            terminal.close();
             return;
         }
         terminal.showSuccess('Changes staged');
+
     }
     
     // Step 11: Commit
@@ -262,10 +259,10 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
     const commitResult = await commit(repoPath, commitMessage);
     if (!commitResult.success) {
         terminal.showError(commitResult.error || 'Failed to commit');
-        terminal.close();
         return;
     }
     terminal.showSuccess('Commit created');
+
     
     // Step 12: Branch switch (if needed) - NOW safe because changes are committed
     let pushBranch = currentBranch;
@@ -276,9 +273,9 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
             if (!createResult.success) {
                 terminal.showError(createResult.error || 'Failed to create branch');
                 terminal.showInfo('Commit was created on current branch. You can switch manually.');
-                terminal.close();
                 return;
             }
+
             terminal.showSuccess(`Created and switched to ${targetBranch}`);
             pushBranch = targetBranch;
         } else {
@@ -288,9 +285,9 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
             if (!checkoutResult.success) {
                 terminal.showError(checkoutResult.error || 'Failed to switch branch');
                 terminal.showInfo('Commit was created on current branch. You can switch manually.');
-                terminal.close();
                 return;
             }
+
             terminal.showSuccess(`Switched to ${targetBranch}`);
             pushBranch = targetBranch;
         }
@@ -304,15 +301,31 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
         const upstreamSet = await hasUpstream(repoPath, pushBranch);
         let pushResult = await push(repoPath, remoteName, pushBranch, !upstreamSet);
         
-        // If push failed, try pulling first
+        // If push failed, try pulling first (with unrelated histories support)
         if (!pushResult.success && pushResult.error?.includes('rejected')) {
             terminal.showInfo('Remote has new changes. Pulling first...');
             terminal.showProgress('Pulling from remote');
-            const pullResult = await pull(repoPath, remoteName, pushBranch, true);
             
+            // Try normal pull first, then with allow-unrelated-histories if needed
+            let pullResult = await pull(repoPath, remoteName, pushBranch, true, false);
+            
+            // If pull failed due to unrelated histories, try again with the flag
+            if (!pullResult.success && pullResult.error?.includes('unrelated histories')) {
+                terminal.showInfo('Detected unrelated histories. Merging...');
+                pullResult = await pull(repoPath, remoteName, pushBranch, false, true);
+            }
+            
+            // Check for merge conflicts
             if (!pullResult.success) {
-                terminal.showError(pullResult.error || 'Failed to pull. Please resolve conflicts manually.');
-                terminal.close();
+                if (pullResult.error?.includes('CONFLICT') || pullResult.error?.includes('Merge conflict')) {
+                    terminal.showError('⚠️ Merge Conflicts Detected!');
+                    terminal.showInfo('Please resolve conflicts in the Source Control view.');
+                    terminal.showInfo('Opening Source Control panel...');
+                    await vscode.commands.executeCommand('workbench.view.scm');
+                    terminal.showInfo('After resolving conflicts, commit and push manually.');
+                    return; // Keep terminal open
+                }
+                terminal.showError(pullResult.error || 'Failed to pull. Please resolve manually.');
                 return;
             }
             terminal.showSuccess('Pulled successfully');
@@ -324,11 +337,11 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
         
         if (!pushResult.success) {
             terminal.showError(pushResult.error || 'Failed to push');
-            terminal.close();
             return;
         }
         terminal.showSuccess(`Pushed to ${remoteName}/${pushBranch}`);
     }
+
     
     // Done!
     terminal.separator();
@@ -357,10 +370,9 @@ function getAIConfig(config: ExtensionConfig): AIProviderConfig {
     }
     
     if (config.aiProvider === 'gemini') {
-        const apiKey = config.geminiApiKey || DEFAULT_GEMINI_API_KEY;
         return {
             provider: 'gemini',
-            apiKey: apiKey,
+            apiKey: config.geminiApiKey,
             model: config.geminiModel || 'gemini-2.0-flash-001',
         };
     }
@@ -373,7 +385,7 @@ function getAIConfig(config: ExtensionConfig): AIProviderConfig {
         };
     }
     
-    // Default: try groq if key is set, otherwise gemini with default key
+    // Default: try groq if key is set, otherwise gemini (user must provide key)
     if (config.groqApiKey) {
         return {
             provider: 'groq',
@@ -382,9 +394,11 @@ function getAIConfig(config: ExtensionConfig): AIProviderConfig {
         };
     }
     
+    // Fall back to gemini with user-provided key (or empty if not configured)
     return {
         provider: 'gemini',
-        apiKey: DEFAULT_GEMINI_API_KEY,
-        model: 'gemini-2.0-flash-001',
+        apiKey: config.geminiApiKey,
+        model: config.geminiModel || 'gemini-2.0-flash-001',
     };
 }
+
