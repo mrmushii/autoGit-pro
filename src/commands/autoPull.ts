@@ -20,6 +20,80 @@ import {
 import { TerminalWorkflow } from '../ui/terminal';
 
 /**
+ * Format raw Git error output into clean, readable lines
+ */
+function formatGitError(rawError: string): string[] {
+    // Normalize line endings and split
+    const normalized = rawError
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+    
+    // Split by newlines and filter empty lines
+    const lines = normalized.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    
+    return lines;
+}
+
+/**
+ * Detect the type of conflict from Git error message
+ */
+function detectConflictType(error: string): 'merge' | 'rebase' | 'pull' | null {
+    const lowerError = error.toLowerCase();
+    
+    if (lowerError.includes('rebase') && (lowerError.includes('conflict') || lowerError.includes('could not apply'))) {
+        return 'rebase';
+    }
+    if (lowerError.includes('merge') && lowerError.includes('conflict')) {
+        return 'merge';
+    }
+    if (lowerError.includes('conflict') || lowerError.includes('would be overwritten')) {
+        return 'pull';
+    }
+    
+    return null;
+}
+
+/**
+ * Get user-friendly conflict instructions based on type
+ */
+function getConflictInstructions(type: 'merge' | 'rebase' | 'pull'): string[] {
+    switch (type) {
+        case 'rebase':
+            return [
+                'A rebase conflict occurred. Your changes conflict with remote commits.',
+                '',
+                'To resolve:',
+                '  1. Open Source Control to see conflicting files',
+                '  2. Edit files to resolve conflicts (look for <<<<<<< markers)',
+                '  3. Stage resolved files with: git add <file>',
+                '  4. Continue rebase with: git rebase --continue',
+                '',
+                'Or to abort: git rebase --abort',
+            ];
+        case 'merge':
+            return [
+                'A merge conflict occurred. Your changes conflict with remote commits.',
+                '',
+                'To resolve:',
+                '  1. Open Source Control to see conflicting files',
+                '  2. Edit files to resolve conflicts (look for <<<<<<< markers)',
+                '  3. Stage resolved files',
+                '  4. Complete the merge by committing',
+            ];
+        case 'pull':
+            return [
+                'Your local changes conflict with remote changes.',
+                '',
+                'To resolve:',
+                '  1. Commit or stash your local changes first',
+                '  2. Then try pulling again',
+            ];
+    }
+}
+
+/**
  * Execute the AutoGit Pro pull workflow in terminal
  */
 export async function executeAutoPull(): Promise<void> {
@@ -135,7 +209,7 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
     
     // Step 10: Execute pull
     terminal.separator();
-    terminal.showProgress(`Pulling ${selectedRemote}/${pullBranch}`);
+    terminal.showProgress('Pulling from remote');
     
     // Try normal pull first
     let pullResult = await pull(repoPath, selectedRemote, pullBranch, false, false);
@@ -146,18 +220,64 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
         pullResult = await pull(repoPath, selectedRemote, pullBranch, false, true);
     }
     
-    // Check for conflicts
+    // Check for conflicts or errors
     if (!pullResult.success) {
-        if (pullResult.error?.includes('CONFLICT') || pullResult.error?.includes('Merge conflict')) {
-            terminal.showError('⚠️ Merge Conflicts Detected!');
-            terminal.showInfo('Please resolve conflicts in the Source Control view.');
+        const errorText = pullResult.error || '';
+        const conflictType = detectConflictType(errorText);
+        
+        if (conflictType) {
+            // Show professional conflict error
+            terminal.writeLine('');
+            terminal.showError('⚠️  Conflict Detected');
+            terminal.separator();
+            
+            // Show clean instructions
+            const instructions = getConflictInstructions(conflictType);
+            for (const line of instructions) {
+                if (line === '') {
+                    terminal.writeLine('');
+                } else if (line.startsWith('  ')) {
+                    terminal.writeLine(`   ${line}`);
+                } else {
+                    terminal.showInfo(line);
+                }
+            }
+            
+            terminal.separator();
             terminal.showInfo('Opening Source Control panel...');
             await vscode.commands.executeCommand('workbench.view.scm');
-            terminal.showInfo('After resolving conflicts, commit the merge.');
+            terminal.writeLine('');
+            terminal.showInfo('Terminal will remain open for reference.');
             return;
         }
         
-        terminal.showError(pullResult.error || 'Failed to pull');
+        // Non-conflict error - format nicely
+        terminal.writeLine('');
+        terminal.showError('Pull failed');
+        terminal.separator();
+        
+        const errorLines = formatGitError(errorText);
+        if (errorLines.length > 0) {
+            terminal.showInfo('Git said:');
+            terminal.writeLine('');
+            for (const line of errorLines.slice(0, 10)) { // Limit to 10 lines
+                // Clean up common Git prefixes for readability
+                const cleanLine = line
+                    .replace(/^hint:\s*/i, '💡 ')
+                    .replace(/^error:\s*/i, '❌ ')
+                    .replace(/^warning:\s*/i, '⚠️ ')
+                    .replace(/^fatal:\s*/i, '🛑 ');
+                terminal.writeLine(`   ${cleanLine}`);
+            }
+            if (errorLines.length > 10) {
+                terminal.writeLine(`   ... and ${errorLines.length - 10} more lines`);
+            }
+        } else {
+            terminal.showInfo('Unknown error occurred during pull.');
+        }
+        
+        terminal.separator();
+        terminal.showInfo('Terminal will remain open for reference.');
         return;
     }
     

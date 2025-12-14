@@ -25,6 +25,7 @@ All notable changes to AutoGit Pro will be documented in this file.
 - ⚠️ **Conflict Handling**: Merge conflicts now gracefully open the Source Control view
 - 🖥️ **Terminal Persistence**: Errors no longer auto-close the terminal - users can read what went wrong
 - 📝 **Commit Messages**: Special characters in messages no longer break the commit
+- 🎨 **Error Display**: Professional formatted error messages with clear step-by-step conflict resolution instructions
 
 ---
 
