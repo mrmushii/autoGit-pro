@@ -6,7 +6,7 @@ All notable changes to AutoGit Pro will be documented in this file.
 
 ### Fixed
 
-- 🖼️ **README Images** - Fixed images not displaying on VS Code Marketplace (now using absolute GitHub URLs)
+- 🖼️ **README Images** - Fixed images not displaying on VS Code Marketplace 
 
 ---
 
