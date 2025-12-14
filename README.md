@@ -6,7 +6,7 @@
 [![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-![AutoGit Pro Hero](https://raw.githubusercontent.com/mrmushii/autogit-pro/main/images/hero-banner.png)
+![AutoGit Pro Hero](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/hero-banner.png)
 
 ---
 
@@ -15,7 +15,7 @@
 ### 🚀 One-Click Commit & Push
 Stage, commit, and push all your changes with a single keyboard shortcut. No more switching between terminal and editor.
 
-![Commit Demo](https://raw.githubusercontent.com/mrmushii/autogit-pro/main/images/commit-demo.png)
+![Commit Demo](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/commit-demo.png)
 
 ### 🤖 AI-Powered Commit Messages
 Let AI analyze your changes and generate meaningful, conventional commit messages. Supports:
@@ -32,7 +32,7 @@ Skip all prompts and commit instantly with AI-generated messages. Ideal for rapi
 ### 🛡️ AI-Powered Error Analysis (NEW in v1.1.1!)
 When conflicts or errors occur, AI explains what went wrong in plain language and provides step-by-step fixes.
 
-![AI Error Analysis](https://raw.githubusercontent.com/mrmushii/autogit-pro/main/images/ai-error-analysis.png)
+![AI Error Analysis](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/ai-error-analysis.png)
 
 
 - Detects rebase, merge, and pull conflicts
