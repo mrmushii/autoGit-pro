@@ -3,27 +3,10 @@
 > **One-click Git workflow automation with AI-powered commit messages**
 
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue.svg)](https://code.visualstudio.com/)
-[![Version](https://img.shields.io/badge/Version-1.1.0-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.1.1-brightgreen.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-<!-- 
-📸 SCREENSHOT GUIDELINES:
-Place your screenshots in an 'images' folder at the project root.
-Recommended screenshots:
-1. images/demo-commit.gif - Animated GIF showing the commit workflow
-2. images/demo-sync.gif - Animated GIF showing the sync/pull workflow  
-3. images/settings.png - Screenshot of VS Code settings panel
-4. images/conflict-handling.png - Screenshot of conflict detection
-
-To capture:
-- Use VS Code's built-in screen recorder or tools like ScreenToGif
-- Keep GIFs under 10MB for good loading times
-- Use 1280x720 or similar resolution
--->
-
-<!-- Uncomment when you have screenshots:
-![AutoGit Pro Demo](images/demo-commit.gif)
--->
+![AutoGit Pro Hero](images/hero-banner.png)
 
 ---
 
@@ -32,6 +15,8 @@ To capture:
 ### 🚀 One-Click Commit & Push
 Stage, commit, and push all your changes with a single keyboard shortcut. No more switching between terminal and editor.
 
+![Commit Demo](images/commit-demo.png)
+
 ### 🤖 AI-Powered Commit Messages
 Let AI analyze your changes and generate meaningful, conventional commit messages. Supports:
 - **Groq** (FREE - Recommended!)
@@ -39,17 +24,23 @@ Let AI analyze your changes and generate meaningful, conventional commit message
 - **Google Gemini**
 
 ### 🔄 Full Git Sync
-New in v1.1.0! Pull remote changes AND push local commits in one action. Perfect for team collaboration.
+Pull remote changes AND push local commits in one action. Perfect for team collaboration.
 
 ### ⚡ Quick Mode
 Skip all prompts and commit instantly with AI-generated messages. Ideal for rapid iteration.
 
-### 🛡️ Smart Error Handling
-- Automatic conflict detection with Source Control handover
-- Handles "unrelated histories" when pushing to new GitHub repos
-- Terminal stays open on errors so you can read what went wrong
+### 🛡️ AI-Powered Error Analysis (NEW in v1.1.1!)
+When conflicts or errors occur, AI explains what went wrong in plain language and provides step-by-step fixes.
+
+![AI Error Analysis](images/ai-error-analysis.png)
+
+- Detects rebase, merge, and pull conflicts
+- Provides tailored resolution instructions
+- Works with Groq, OpenAI, and Gemini
+- Falls back to formatted display if AI isn't configured
 
 ---
+
 
 ## 🎯 Quick Start
 
@@ -233,14 +224,12 @@ Don't have Git initialized? No problem!
 
 ---
 
-## 🔄 What's New in v1.1.0
+## 🔄 What's New in v1.1.1
 
-- 🔄 **Sync Command** - Pull + Push in one action
-- 🔐 **Security** - Removed hardcoded API keys
-- 🌿 **Unrelated Histories** - Fixed GitHub repo with README issue
-- ⚠️ **Conflict Handling** - Opens Source Control on conflicts
-- 🖥️ **Error Visibility** - Terminal stays open on errors
-- 📝 **Special Characters** - Commit messages with quotes/symbols work
+- 🤖 **AI Error Analysis** - AI explains errors and suggests fixes in plain language
+- 🎨 **Professional Error Display** - Raw Git output is now clean and formatted
+- 📋 **Smart Conflict Detection** - Detects rebase, merge, and pull conflicts
+- 🔄 **Sync Command** - Pull + Push in one action (from v1.1.0)
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 
