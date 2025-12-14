@@ -3,7 +3,7 @@
 > **One-click Git workflow automation with AI-powered commit messages**
 
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue.svg)](https://code.visualstudio.com/)
-[![Version](https://img.shields.io/badge/Version-1.1.1-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ![AutoGit Pro Hero](https://raw.githubusercontent.com/mrmushii/autogit-pro/main/images/hero-banner.png)
@@ -225,7 +225,7 @@ Don't have Git initialized? No problem!
 
 ---
 
-## 🔄 What's New in v1.1.1
+## 🔄 What's New in v1.1.2
 
 - 🤖 **AI Error Analysis** - AI explains errors and suggests fixes in plain language
 - 🎨 **Professional Error Display** - Raw Git output is now clean and formatted
