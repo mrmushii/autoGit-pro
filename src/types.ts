@@ -143,3 +143,52 @@ export function getExtensionConfig(): ExtensionConfig {
         commitMessageTemplate: config.get<string>('commitMessageTemplate', ''),
     };
 }
+
+/**
+ * Get AI provider configuration from extension settings
+ * Determines the correct API key and model based on provider selection
+ */
+export function getAIProviderConfig(): AIProviderConfig {
+    const config = getExtensionConfig();
+    
+    // Handle explicit provider selection
+    if (config.aiProvider === 'groq') {
+        return {
+            provider: 'groq',
+            apiKey: config.groqApiKey,
+            model: config.groqModel || 'llama-3.1-8b-instant',
+        };
+    }
+    
+    if (config.aiProvider === 'gemini') {
+        return {
+            provider: 'gemini',
+            apiKey: config.geminiApiKey,
+            model: config.geminiModel || 'gemini-2.0-flash-001',
+        };
+    }
+    
+    if (config.aiProvider === 'openai') {
+        return {
+            provider: 'openai',
+            apiKey: config.openaiApiKey,
+            model: config.openaiModel || 'gpt-4o-mini',
+        };
+    }
+    
+    // Default: try groq if key is set, otherwise return 'none'
+    if (config.groqApiKey) {
+        return {
+            provider: 'groq',
+            apiKey: config.groqApiKey,
+            model: config.groqModel || 'llama-3.1-8b-instant',
+        };
+    }
+    
+    // No provider configured
+    return {
+        provider: 'none',
+        apiKey: '',
+        model: '',
+    };
+}

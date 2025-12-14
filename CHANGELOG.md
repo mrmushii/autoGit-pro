@@ -11,7 +11,10 @@ All notable changes to AutoGit Pro will be documented in this file.
   - **Full Sync**: Pulls remote changes AND pushes local commits in one action
   - Select remote and branch to sync with
   - Automatic conflict detection with Source Control handover
-
+- 🤖 **AI-Powered Error Analysis** - When errors or conflicts occur, AI explains what went wrong and suggests fixes
+  - Works with Groq, OpenAI, and Gemini providers
+  - Provides step-by-step resolution instructions
+  - Gracefully falls back to formatted display if AI is not configured
 
 ### Changed
 
@@ -31,8 +34,8 @@ All notable changes to AutoGit Pro will be documented in this file.
 
 ## [1.0.3] - 2025-12-10
 
-
 ### Added
+
 
 - ⚡ **Quick Mode** for Quick Commit command - skips prompts for faster workflow
   - Uses AI-generated message directly without confirmation

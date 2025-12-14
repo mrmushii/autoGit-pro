@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getExtensionConfig, type AIProviderConfig, type ExtensionConfig } from '../types';
+import { getExtensionConfig, getAIProviderConfig, type AIProviderConfig, type ExtensionConfig } from '../types';
 import { detectRepository, getWorkspaceFolderPath } from '../utils/repoDetector';
 import {
     isGitInstalled,
@@ -18,7 +18,7 @@ import {
     hasUpstream,
     initRepository,
 } from '../utils/git';
-import { generateCommitMessage, validateAIConfig } from '../utils/ai';
+import { generateCommitMessage, validateAIConfig, analyzeGitError } from '../utils/ai';
 import { TerminalWorkflow } from '../ui/terminal';
 
 
@@ -315,17 +315,97 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
                 pullResult = await pull(repoPath, remoteName, pushBranch, false, true);
             }
             
-            // Check for merge conflicts
+            // Check for errors during pull
             if (!pullResult.success) {
-                if (pullResult.error?.includes('CONFLICT') || pullResult.error?.includes('Merge conflict')) {
-                    terminal.showError('⚠️ Merge Conflicts Detected!');
-                    terminal.showInfo('Please resolve conflicts in the Source Control view.');
+                const errorText = pullResult.error || '';
+                
+                // Try AI analysis for smart error explanation
+                terminal.writeLine('');
+                terminal.showProgress('Analyzing error with AI');
+                
+                const pullAiConfig = getAIProviderConfig();
+                const aiAnalysis = await analyzeGitError(pullAiConfig, errorText, {
+                    operation: 'pull --rebase',
+                    branch: pushBranch,
+                    remote: remoteName,
+                });
+                
+                // Check for conflicts
+                const isConflict = errorText.toLowerCase().includes('conflict') || 
+                                   errorText.toLowerCase().includes('could not apply') ||
+                                   errorText.toLowerCase().includes('merge') ||
+                                   errorText.toLowerCase().includes('rebase');
+                
+                if (isConflict) {
+                    terminal.writeLine('');
+                    terminal.showError('⚠️  Conflict Detected');
+                    terminal.separator();
+                    
+                    if (aiAnalysis.success && aiAnalysis.explanation) {
+                        terminal.showInfo('🤖 AI Analysis:');
+                        terminal.writeLine('');
+                        terminal.writeLine(`   ${aiAnalysis.explanation}`);
+                        terminal.writeLine('');
+                        
+                        if (aiAnalysis.suggestions && aiAnalysis.suggestions.length > 0) {
+                            terminal.showInfo('📋 How to Fix:');
+                            terminal.writeLine('');
+                            for (let i = 0; i < aiAnalysis.suggestions.length; i++) {
+                                terminal.writeLine(`   ${i + 1}. ${aiAnalysis.suggestions[i]}`);
+                            }
+                        }
+                    } else {
+                        terminal.showInfo('Your changes conflict with remote changes.');
+                        terminal.writeLine('');
+                        terminal.showInfo('To resolve:');
+                        terminal.writeLine('   1. Open Source Control to see conflicting files');
+                        terminal.writeLine('   2. Resolve conflicts (look for <<<<<<< markers)');
+                        terminal.writeLine('   3. Stage resolved files');
+                        terminal.writeLine('   4. Run: git rebase --continue (or git rebase --abort)');
+                    }
+                    
+                    terminal.separator();
                     terminal.showInfo('Opening Source Control panel...');
                     await vscode.commands.executeCommand('workbench.view.scm');
-                    terminal.showInfo('After resolving conflicts, commit and push manually.');
-                    return; // Keep terminal open
+                    terminal.writeLine('');
+                    terminal.showInfo('Terminal will remain open for reference.');
+                    return;
                 }
-                terminal.showError(pullResult.error || 'Failed to pull. Please resolve manually.');
+                
+                // Non-conflict error - show AI analysis or formatted error
+                terminal.writeLine('');
+                terminal.showError('Pull failed');
+                terminal.separator();
+                
+                if (aiAnalysis.success && aiAnalysis.explanation) {
+                    terminal.showInfo('🤖 AI Analysis:');
+                    terminal.writeLine('');
+                    terminal.writeLine(`   ${aiAnalysis.explanation}`);
+                    terminal.writeLine('');
+                    
+                    if (aiAnalysis.suggestions && aiAnalysis.suggestions.length > 0) {
+                        terminal.showInfo('📋 How to Fix:');
+                        terminal.writeLine('');
+                        for (let i = 0; i < aiAnalysis.suggestions.length; i++) {
+                            terminal.writeLine(`   ${i + 1}. ${aiAnalysis.suggestions[i]}`);
+                        }
+                    }
+                } else {
+                    terminal.showInfo('Please resolve the issue manually.');
+                    terminal.writeLine('');
+                    // Show formatted error lines
+                    const errorLines = errorText.split(/[\r\n]+/).filter(l => l.trim());
+                    for (const line of errorLines.slice(0, 8)) {
+                        const cleanLine = line.trim()
+                            .replace(/^hint:\s*/i, '💡 ')
+                            .replace(/^error:\s*/i, '❌ ')
+                            .replace(/^fatal:\s*/i, '🛑 ');
+                        terminal.writeLine(`   ${cleanLine}`);
+                    }
+                }
+                
+                terminal.separator();
+                terminal.showInfo('Terminal will remain open for reference.');
                 return;
             }
             terminal.showSuccess('Pulled successfully');

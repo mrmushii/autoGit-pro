@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { getExtensionConfig } from '../types';
+import { getExtensionConfig, getAIProviderConfig } from '../types';
 import { detectRepository } from '../utils/repoDetector';
 import {
     isGitInstalled,
@@ -16,7 +16,7 @@ import {
     fetch,
     hasUpstream,
 } from '../utils/git';
-
+import { analyzeGitError } from '../utils/ai';
 import { TerminalWorkflow } from '../ui/terminal';
 
 /**
@@ -225,21 +225,49 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
         const errorText = pullResult.error || '';
         const conflictType = detectConflictType(errorText);
         
+        // Try AI analysis for smart error explanation
+        terminal.writeLine('');
+        terminal.showProgress('Analyzing error with AI');
+        
+        const aiConfig = getAIProviderConfig();
+        const aiAnalysis = await analyzeGitError(aiConfig, errorText, {
+            operation: 'pull',
+            branch: currentBranch,
+            remote: selectedRemote,
+        });
+        
         if (conflictType) {
-            // Show professional conflict error
+            // Show professional conflict error with AI insights
             terminal.writeLine('');
             terminal.showError('⚠️  Conflict Detected');
             terminal.separator();
             
-            // Show clean instructions
-            const instructions = getConflictInstructions(conflictType);
-            for (const line of instructions) {
-                if (line === '') {
+            // Show AI explanation if available
+            if (aiAnalysis.success && aiAnalysis.explanation) {
+                terminal.showInfo('🤖 AI Analysis:');
+                terminal.writeLine('');
+                terminal.writeLine(`   ${aiAnalysis.explanation}`);
+                terminal.writeLine('');
+                
+                if (aiAnalysis.suggestions && aiAnalysis.suggestions.length > 0) {
+                    terminal.showInfo('📋 Suggested Steps:');
                     terminal.writeLine('');
-                } else if (line.startsWith('  ')) {
-                    terminal.writeLine(`   ${line}`);
-                } else {
-                    terminal.showInfo(line);
+                    for (let i = 0; i < aiAnalysis.suggestions.length; i++) {
+                        terminal.writeLine(`   ${i + 1}. ${aiAnalysis.suggestions[i]}`);
+                    }
+                    terminal.writeLine('');
+                }
+            } else {
+                // Fallback to static instructions
+                const instructions = getConflictInstructions(conflictType);
+                for (const line of instructions) {
+                    if (line === '') {
+                        terminal.writeLine('');
+                    } else if (line.startsWith('  ')) {
+                        terminal.writeLine(`   ${line}`);
+                    } else {
+                        terminal.showInfo(line);
+                    }
                 }
             }
             
@@ -251,29 +279,45 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
             return;
         }
         
-        // Non-conflict error - format nicely
+        // Non-conflict error - show AI analysis or formatted error
         terminal.writeLine('');
         terminal.showError('Pull failed');
         terminal.separator();
         
-        const errorLines = formatGitError(errorText);
-        if (errorLines.length > 0) {
-            terminal.showInfo('Git said:');
+        if (aiAnalysis.success && aiAnalysis.explanation) {
+            // Show AI-powered explanation
+            terminal.showInfo('🤖 AI Analysis:');
             terminal.writeLine('');
-            for (const line of errorLines.slice(0, 10)) { // Limit to 10 lines
-                // Clean up common Git prefixes for readability
-                const cleanLine = line
-                    .replace(/^hint:\s*/i, '💡 ')
-                    .replace(/^error:\s*/i, '❌ ')
-                    .replace(/^warning:\s*/i, '⚠️ ')
-                    .replace(/^fatal:\s*/i, '🛑 ');
-                terminal.writeLine(`   ${cleanLine}`);
-            }
-            if (errorLines.length > 10) {
-                terminal.writeLine(`   ... and ${errorLines.length - 10} more lines`);
+            terminal.writeLine(`   ${aiAnalysis.explanation}`);
+            terminal.writeLine('');
+            
+            if (aiAnalysis.suggestions && aiAnalysis.suggestions.length > 0) {
+                terminal.showInfo('📋 How to Fix:');
+                terminal.writeLine('');
+                for (let i = 0; i < aiAnalysis.suggestions.length; i++) {
+                    terminal.writeLine(`   ${i + 1}. ${aiAnalysis.suggestions[i]}`);
+                }
             }
         } else {
-            terminal.showInfo('Unknown error occurred during pull.');
+            // Fallback to formatted raw output
+            const errorLines = formatGitError(errorText);
+            if (errorLines.length > 0) {
+                terminal.showInfo('Git said:');
+                terminal.writeLine('');
+                for (const line of errorLines.slice(0, 10)) {
+                    const cleanLine = line
+                        .replace(/^hint:\s*/i, '💡 ')
+                        .replace(/^error:\s*/i, '❌ ')
+                        .replace(/^warning:\s*/i, '⚠️ ')
+                        .replace(/^fatal:\s*/i, '🛑 ');
+                    terminal.writeLine(`   ${cleanLine}`);
+                }
+                if (errorLines.length > 10) {
+                    terminal.writeLine(`   ... and ${errorLines.length - 10} more lines`);
+                }
+            } else {
+                terminal.showInfo('Unknown error occurred during pull.');
+            }
         }
         
         terminal.separator();

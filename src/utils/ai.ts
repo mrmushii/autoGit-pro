@@ -368,3 +368,171 @@ export function validateAIConfig(config: AIProviderConfig): { valid: boolean; er
     
     return { valid: true };
 }
+
+/**
+ * Result of AI error analysis
+ */
+export interface AIErrorAnalysis {
+    success: boolean;
+    explanation?: string;
+    suggestions?: string[];
+    error?: string;
+}
+
+/**
+ * System prompt for analyzing Git errors
+ */
+const ERROR_ANALYSIS_PROMPT = `You are a Git expert helping a developer understand and fix Git errors.
+
+Analyze the Git error and provide:
+1. A simple, plain-language explanation of what went wrong (2-3 sentences max)
+2. Specific steps to fix the issue (numbered list, max 5 steps)
+
+Rules:
+- Be concise and developer-friendly
+- Focus on practical solutions
+- If it's a merge conflict, explain which files conflict and suggest resolution strategies
+- If it's a rebase issue, explain the state and how to continue or abort
+- Use simple language, avoid jargon
+
+Format your response EXACTLY like this:
+EXPLANATION: [your explanation here]
+
+STEPS:
+1. [first step]
+2. [second step]
+...
+
+Do not include any other text.`;
+
+/**
+ * Analyze a Git error using AI
+ */
+export async function analyzeGitError(
+    config: AIProviderConfig,
+    errorMessage: string,
+    context?: { branch?: string; remote?: string; operation?: string }
+): Promise<AIErrorAnalysis> {
+    // Check if AI is configured
+    if (config.provider === 'none' || !config.apiKey) {
+        return {
+            success: false,
+            error: 'AI not configured',
+        };
+    }
+
+    try {
+        // Build the user prompt with context
+        const contextParts: string[] = [];
+        if (context?.operation) {
+            contextParts.push(`Operation: git ${context.operation}`);
+        }
+        if (context?.branch) {
+            contextParts.push(`Branch: ${context.branch}`);
+        }
+        if (context?.remote) {
+            contextParts.push(`Remote: ${context.remote}`);
+        }
+        
+        const userPrompt = `${contextParts.length > 0 ? contextParts.join('\n') + '\n\n' : ''}Git Error:\n${errorMessage}`;
+
+        let response: string;
+
+        // Use the appropriate API based on provider
+        if (config.provider === 'groq') {
+            const requestBody = JSON.stringify({
+                model: config.model || 'llama-3.1-8b-instant',
+                messages: [
+                    { role: 'system', content: ERROR_ANALYSIS_PROMPT },
+                    { role: 'user', content: userPrompt },
+                ],
+                max_tokens: 800,
+                temperature: 0.3,
+            });
+
+            response = await httpsPost(
+                'api.groq.com',
+                '/openai/v1/chat/completions',
+                { 'Authorization': `Bearer ${config.apiKey}` },
+                requestBody
+            );
+        } else if (config.provider === 'openai') {
+            const requestBody = JSON.stringify({
+                model: config.model || 'gpt-4o-mini',
+                messages: [
+                    { role: 'system', content: ERROR_ANALYSIS_PROMPT },
+                    { role: 'user', content: userPrompt },
+                ],
+                max_tokens: 800,
+                temperature: 0.3,
+            });
+
+            response = await httpsPost(
+                'api.openai.com',
+                '/v1/chat/completions',
+                { 'Authorization': `Bearer ${config.apiKey}` },
+                requestBody
+            );
+        } else if (config.provider === 'gemini') {
+            const fullPrompt = `${ERROR_ANALYSIS_PROMPT}\n\n${userPrompt}`;
+            const requestBody = JSON.stringify({
+                contents: [{ parts: [{ text: fullPrompt }] }],
+                generationConfig: {
+                    maxOutputTokens: 800,
+                    temperature: 0.3,
+                },
+            });
+
+            response = await httpsPost(
+                'generativelanguage.googleapis.com',
+                `/v1beta/models/${config.model || 'gemini-2.0-flash-001'}:generateContent?key=${config.apiKey}`,
+                {},
+                requestBody
+            );
+        } else {
+            return { success: false, error: 'Unknown AI provider' };
+        }
+
+        // Parse the response based on provider
+        let content: string | undefined;
+        
+        if (config.provider === 'gemini') {
+            const data = JSON.parse(response) as {
+                candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+            };
+            content = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        } else {
+            const data = JSON.parse(response) as {
+                choices?: Array<{ message?: { content?: string } }>;
+            };
+            content = data.choices?.[0]?.message?.content?.trim();
+        }
+
+        if (!content) {
+            return { success: false, error: 'No analysis generated' };
+        }
+
+        // Parse the structured response
+        const explanationMatch = content.match(/EXPLANATION:\s*(.+?)(?=\n\nSTEPS:|$)/s);
+        const stepsMatch = content.match(/STEPS:\s*([\s\S]+)$/);
+
+        const explanation = explanationMatch?.[1]?.trim() || content;
+        const stepsText = stepsMatch?.[1]?.trim() || '';
+        
+        const suggestions = stepsText
+            .split('\n')
+            .map(line => line.replace(/^\d+\.\s*/, '').trim())
+            .filter(line => line.length > 0);
+
+        return {
+            success: true,
+            explanation,
+            suggestions: suggestions.length > 0 ? suggestions : undefined,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'AI analysis failed',
+        };
+    }
+}
