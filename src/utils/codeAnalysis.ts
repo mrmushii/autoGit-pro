@@ -259,28 +259,28 @@ function generateTips(
     const tips: string[] = [];
     
     if (messageQuality < 80) {
-        tips.push('💡 Use prefixes like "feat:", "fix:", "docs:" for clearer commit history');
+        tips.push('Use prefixes like "feat:", "fix:", "docs:" for clearer commit history');
     }
     
     if (avgFiles > 5) {
-        tips.push('📦 Smaller commits (< 5 files) are easier to review and revert');
+        tips.push('Smaller commits (< 5 files) are easier to review and revert');
     }
     
     if (commitTypes.refactor === 0) {
-        tips.push('🔧 Regular refactoring commits help maintain code quality');
+        tips.push('Regular refactoring commits help maintain code quality');
     }
     
     if (avgLines > 200) {
-        tips.push('✂️ Large diffs are hard to review - aim for < 200 lines per commit');
+        tips.push('Large diffs are hard to review - aim for < 200 lines per commit');
     }
     
     if (commitTypes.other > commitTypes.feat + commitTypes.fix) {
-        tips.push('🏷️ Use conventional commit types for better changelog generation');
+        tips.push('Use conventional commit types for better changelog generation');
     }
     
     // Always add a positive tip
     if (tips.length === 0) {
-        tips.push('✨ Your commit practices are excellent! Keep up the great work.');
+        tips.push('Your commit practices are excellent! Keep up the great work.');
     }
     
     return tips;

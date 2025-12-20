@@ -219,6 +219,7 @@ export class HistoryPanel {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commit History & Analysis</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --bg-primary: var(--vscode-editor-background);
@@ -271,10 +272,56 @@ export class HistoryPanel {
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .refresh-btn:hover {
             opacity: 0.9;
+        }
+        
+        /* Lucide Icon Styles */
+        .header-icon {
+            width: 28px;
+            height: 28px;
+            color: var(--accent);
+        }
+        
+        .section-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--accent);
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
+        .card-icon {
+            width: 18px;
+            height: 18px;
+            color: var(--accent);
+            vertical-align: middle;
+        }
+        
+        .strength-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--success);
+            flex-shrink: 0;
+        }
+        
+        .improvement-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--warning);
+            flex-shrink: 0;
+        }
+        
+        .tip-icon {
+            width: 16px;
+            height: 16px;
+            color: #fbbf24;
+            flex-shrink: 0;
         }
         
         .grid {
@@ -496,15 +543,15 @@ export class HistoryPanel {
 </head>
 <body>
     <div class="header">
-        <h1>📊 Commit History & Analysis</h1>
-        <button class="refresh-btn" onclick="refresh()">🔄 Refresh</button>
+        <h1><i data-lucide="bar-chart-3" class="header-icon"></i> Commit History & Analysis</h1>
+        <button class="refresh-btn" onclick="refresh()"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Refresh</button>
     </div>
     
     ${analysis ? this.renderAnalysis(analysis) : ''}
     
     <div class="commits-section">
         <div class="commits-header">
-            <h2>📜 Recent Commits</h2>
+            <h2><i data-lucide="git-commit" class="section-icon"></i> Recent Commits</h2>
             <span class="commit-count">${totalCount} total commits</span>
         </div>
         
@@ -517,6 +564,9 @@ export class HistoryPanel {
         function refresh() {
             vscode.postMessage({ command: 'refresh' });
         }
+        
+        // Initialize Lucide icons
+        lucide.createIcons();
     </script>
 </body>
 </html>`;
@@ -527,15 +577,15 @@ export class HistoryPanel {
      */
     private renderAnalysis(analysis: CodeAnalysis): string {
         const strengthsHtml = analysis.strengths.map(s => 
-            `<li><span class="strength">✓</span> ${s}</li>`
+            `<li><i data-lucide="check-circle" class="strength-icon"></i> ${s}</li>`
         ).join('');
         
         const improvementsHtml = analysis.improvements.map(i => 
-            `<li><span class="improvement">→</span> ${i}</li>`
+            `<li><i data-lucide="arrow-right-circle" class="improvement-icon"></i> ${i}</li>`
         ).join('');
         
         const tipsHtml = analysis.personalizedTips.map(t => 
-            `<div class="tip-item">${t}</div>`
+            `<div class="tip-item"><i data-lucide="lightbulb" class="tip-icon"></i> ${t}</div>`
         ).join('');
 
         return `
@@ -554,7 +604,7 @@ export class HistoryPanel {
             </div>
             
             <div class="card">
-                <div class="card-title">📈 Statistics</div>
+                <div class="card-title"><i data-lucide="trending-up" class="card-icon"></i> Statistics</div>
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-value">${analysis.codeQuality.avgFilesPerCommit}</div>
@@ -572,14 +622,14 @@ export class HistoryPanel {
             </div>
             
             <div class="card">
-                <div class="card-title">💪 Strengths</div>
+                <div class="card-title"><i data-lucide="trophy" class="card-icon"></i> Strengths</div>
                 <ul class="insights-list">
                     ${strengthsHtml || '<li style="color: var(--text-muted);">Make more commits to see strengths</li>'}
                 </ul>
             </div>
             
             <div class="card">
-                <div class="card-title">📈 Areas to Improve</div>
+                <div class="card-title"><i data-lucide="target" class="card-icon"></i> Areas to Improve</div>
                 <ul class="insights-list">
                     ${improvementsHtml || '<li style="color: var(--text-muted);">Looking good! No improvements needed.</li>'}
                 </ul>
@@ -588,7 +638,7 @@ export class HistoryPanel {
         
         <div class="tips-section">
             <div class="card">
-                <div class="card-title">💡 Personalized Tips</div>
+                <div class="card-title"><i data-lucide="lightbulb" class="card-icon"></i> Personalized Tips</div>
                 ${tipsHtml}
             </div>
         </div>`;
