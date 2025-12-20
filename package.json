@@ -62,6 +62,10 @@
       {
         "command": "autogit-pro.manageTemplates",
         "title": "AutoGit Pro: Manage Commit Templates"
+      },
+      {
+        "command": "autogit-pro.showStats",
+        "title": "AutoGit Pro: Show My Stats"
       }
     ],
 

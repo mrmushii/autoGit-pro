@@ -11,6 +11,7 @@ import { executeAutoCommit } from './commands/autoCommit';
 import { executeAutoPull } from './commands/autoPull';
 import { isGitInstalled } from './utils/git';
 import { initTemplatesManager, getTemplatesManager } from './utils/templates';
+import { initAnalyticsManager, getAnalyticsManager } from './utils/analytics';
 
 
 /**
@@ -22,6 +23,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     
     // Initialize templates manager
     initTemplatesManager(context);
+    
+    // Initialize analytics manager
+    initAnalyticsManager(context);
     
     // Verify Git is available
     const gitAvailable = await isGitInstalled();
@@ -98,6 +102,26 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
     );
     context.subscriptions.push(manageTemplatesCommand);
+
+    // Register the show stats command
+    const showStatsCommand = vscode.commands.registerCommand(
+        'autogit-pro.showStats',
+        async () => {
+            try {
+                const manager = getAnalyticsManager();
+                if (manager) {
+                    await manager.showStats();
+                } else {
+                    void vscode.window.showErrorMessage('Analytics not initialized.');
+                }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Unknown error';
+                void vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
+                console.error('AutoGit Pro Error:', error);
+            }
+        }
+    );
+    context.subscriptions.push(showStatsCommand);
 
     
     // Show welcome message on first activation

@@ -18,6 +18,7 @@ import {
 } from '../utils/git';
 import { analyzeGitError } from '../utils/ai';
 import { TerminalWorkflow } from '../ui/terminal';
+import { trackPull, trackPush, getTimeSavedEstimate } from '../utils/analytics';
 
 /**
  * Format raw Git error output into clean, readable lines
@@ -328,6 +329,9 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
     // Success!
     terminal.showSuccess('Pull completed successfully!');
     
+    // Track pull in analytics
+    await trackPull();
+    
     // Show what was pulled
     if (pullResult.data) {
         terminal.writeLine('');
@@ -350,6 +354,7 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
     
     if (pushResult.success) {
         terminal.showSuccess(`Pushed local commits to ${selectedRemote}/${currentBranch}`);
+        await trackPush();
     } else if (pushResult.error?.includes('Everything up-to-date')) {
         terminal.showInfo('No local commits to push - already up to date');
     } else {
@@ -361,6 +366,7 @@ async function runPullWorkflow(terminal: TerminalWorkflow): Promise<void> {
     terminal.separator();
     terminal.writeLine('');
     terminal.showSuccess('✨ All done! Pull and push completed successfully.');
+    terminal.showInfo(`📊 Total time saved with AutoGit Pro: ${getTimeSavedEstimate()}`);
     terminal.writeLine('');
     terminal.showInfo('Terminal will close in 3 seconds...');
     

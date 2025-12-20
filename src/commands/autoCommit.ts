@@ -20,6 +20,7 @@ import {
 } from '../utils/git';
 import { generateCommitMessage, validateAIConfig, analyzeGitError } from '../utils/ai';
 import { TerminalWorkflow } from '../ui/terminal';
+import { trackCommit, trackPush, trackAiMessage, getTimeSavedEstimate } from '../utils/analytics';
 
 
 /**
@@ -189,6 +190,9 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
                     terminal.writeLine(`  ${line}`);
                 }
                 terminal.writeLine('');
+                
+                // Track AI message generation
+                await trackAiMessage();
             } else {
                 terminal.showError(`AI generation failed: ${aiResult.error}`);
             }
@@ -271,6 +275,9 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
         return;
     }
     terminal.showSuccess('Commit created');
+    
+    // Track commit in analytics
+    await trackCommit();
 
     
     // Step 12: Branch switch (if needed) - NOW safe because changes are committed
@@ -429,6 +436,9 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
             return;
         }
         terminal.showSuccess(`Pushed to ${remoteName}/${pushBranch}`);
+        
+        // Track push in analytics
+        await trackPush();
     }
 
     
@@ -436,6 +446,7 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
     terminal.separator();
     terminal.writeLine('');
     terminal.showSuccess('✨ All done! Commit and push completed successfully.');
+    terminal.showInfo(`📊 Total time saved with AutoGit Pro: ${getTimeSavedEstimate()}`);
     terminal.writeLine('');
     terminal.showInfo('Terminal will close in 3 seconds...');
     
