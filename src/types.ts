@@ -88,6 +88,11 @@ export interface AICommitResult {
 export type CommitStyle = 'basic' | 'conventional' | 'detailed';
 
 /**
+ * Multi-repo handling mode
+ */
+export type MultiRepoMode = 'ask' | 'all' | 'active';
+
+/**
  * Extension configuration from VS Code settings
  */
 export interface ExtensionConfig {
@@ -105,6 +110,8 @@ export interface ExtensionConfig {
     commitMessageTemplate: string;
     commitStyle: CommitStyle;
     includeScope: boolean;
+    multiRepoMode: MultiRepoMode;
+    scanNestedRepos: boolean;
 }
 
 /**
@@ -150,6 +157,8 @@ export function getExtensionConfig(): ExtensionConfig {
         commitMessageTemplate: config.get<string>('commitMessageTemplate', ''),
         commitStyle: config.get<CommitStyle>('commitStyle', 'conventional'),
         includeScope: config.get<boolean>('includeScope', true),
+        multiRepoMode: config.get<MultiRepoMode>('multiRepoMode', 'ask'),
+        scanNestedRepos: config.get<boolean>('scanNestedRepos', false),
     };
 }
 

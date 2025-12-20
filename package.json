@@ -177,6 +177,26 @@
           "type": "boolean",
           "default": true,
           "description": "Include scope in conventional commits (e.g., feat(auth): ... vs feat: ...)"
+        },
+        "autogit-pro.multiRepoMode": {
+          "type": "string",
+          "enum": [
+            "ask",
+            "all",
+            "active"
+          ],
+          "enumDescriptions": [
+            "Ask which repository to commit to when multiple are found",
+            "Commit to all repositories in the workspace",
+            "Automatically use the repository of the active file"
+          ],
+          "default": "ask",
+          "description": "How to handle multiple Git repositories in the workspace"
+        },
+        "autogit-pro.scanNestedRepos": {
+          "type": "boolean",
+          "default": false,
+          "description": "Scan for nested Git repositories (useful for monorepos with sub-projects)"
         }
       }
     }
