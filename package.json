@@ -66,6 +66,10 @@
       {
         "command": "autogit-pro.showStats",
         "title": "AutoGit Pro: Show My Stats"
+      },
+      {
+        "command": "autogit-pro.showHistory",
+        "title": "AutoGit Pro: Commit History & Analysis"
       }
     ],
 

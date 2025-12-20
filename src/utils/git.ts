@@ -519,3 +519,205 @@ export async function pull(
     };
 }
 
+/**
+ * Commit info structure for history
+ */
+export interface CommitInfo {
+    hash: string;
+    shortHash: string;
+    author: string;
+    email: string;
+    date: string;
+    message: string;
+    subject: string;
+    body: string;
+}
+
+/**
+ * Get commit history (git log)
+ */
+export async function getGitLog(
+    cwd: string,
+    limit: number = 20,
+    skip: number = 0
+): Promise<GitOperationResult<CommitInfo[]>> {
+    // Format: hash|shortHash|author|email|date|subject
+    const format = '%H|%h|%an|%ae|%ci|%s';
+    const result = await executeGitWithArgs(cwd, [
+        'log',
+        `--format=${format}`,
+        `-n`, `${limit}`,
+        `--skip=${skip}`,
+    ]);
+    
+    if (!result.success) {
+        return {
+            success: false,
+            error: result.error,
+            data: [],
+        };
+    }
+    
+    if (!result.data || result.data.trim() === '') {
+        return { success: true, data: [] };
+    }
+    
+    const commits: CommitInfo[] = [];
+    const lines = result.data.split('\n').filter(l => l.trim());
+    
+    for (const line of lines) {
+        const parts = line.split('|');
+        if (parts.length >= 6) {
+            commits.push({
+                hash: parts[0],
+                shortHash: parts[1],
+                author: parts[2],
+                email: parts[3],
+                date: parts[4],
+                message: parts.slice(5).join('|'), // Subject may contain pipes
+                subject: parts.slice(5).join('|'),
+                body: '',
+            });
+        }
+    }
+    
+    return { success: true, data: commits };
+}
+
+/**
+ * Get full commit message (subject + body)
+ */
+export async function getCommitMessage(
+    cwd: string,
+    hash: string
+): Promise<GitOperationResult<string>> {
+    const result = await executeGitWithArgs(cwd, [
+        'log',
+        '-1',
+        '--format=%B',
+        hash,
+    ]);
+    
+    return result;
+}
+
+/**
+ * Get diff for a specific commit
+ */
+export async function getCommitDiff(
+    cwd: string,
+    hash: string
+): Promise<GitOperationResult<string>> {
+    const result = await executeGitWithArgs(cwd, [
+        'show',
+        '--stat',
+        '--patch',
+        hash,
+    ]);
+    
+    return result;
+}
+
+/**
+ * Get commit statistics (files changed, insertions, deletions)
+ */
+export interface CommitStats {
+    filesChanged: number;
+    insertions: number;
+    deletions: number;
+}
+
+export async function getCommitStats(
+    cwd: string,
+    hash: string
+): Promise<GitOperationResult<CommitStats>> {
+    const result = await executeGitWithArgs(cwd, [
+        'show',
+        '--stat',
+        '--format=',
+        hash,
+    ]);
+    
+    if (!result.success) {
+        return {
+            success: false,
+            error: result.error,
+        };
+    }
+    
+    // Parse the last line of --stat output
+    // Example: "3 files changed, 50 insertions(+), 10 deletions(-)"
+    const lines = (result.data || '').trim().split('\n');
+    const lastLine = lines[lines.length - 1] || '';
+    
+    const filesMatch = lastLine.match(/(\d+) files? changed/);
+    const insertionsMatch = lastLine.match(/(\d+) insertions?/);
+    const deletionsMatch = lastLine.match(/(\d+) deletions?/);
+    
+    return {
+        success: true,
+        data: {
+            filesChanged: filesMatch ? parseInt(filesMatch[1], 10) : 0,
+            insertions: insertionsMatch ? parseInt(insertionsMatch[1], 10) : 0,
+            deletions: deletionsMatch ? parseInt(deletionsMatch[1], 10) : 0,
+        },
+    };
+}
+
+/**
+ * Get total commit count
+ */
+export async function getTotalCommitCount(cwd: string): Promise<GitOperationResult<number>> {
+    const result = await executeGitWithArgs(cwd, ['rev-list', '--count', 'HEAD']);
+    
+    if (!result.success) {
+        return { success: false, error: result.error };
+    }
+    
+    const count = parseInt(result.data || '0', 10);
+    return { success: true, data: count };
+}
+
+/**
+ * Get commits from the last N days
+ */
+export async function getRecentCommits(
+    cwd: string,
+    days: number = 7
+): Promise<GitOperationResult<CommitInfo[]>> {
+    const format = '%H|%h|%an|%ae|%ci|%s';
+    const result = await executeGitWithArgs(cwd, [
+        'log',
+        `--format=${format}`,
+        `--since=${days}.days.ago`,
+    ]);
+    
+    if (!result.success) {
+        return { success: false, error: result.error, data: [] };
+    }
+    
+    if (!result.data || result.data.trim() === '') {
+        return { success: true, data: [] };
+    }
+    
+    const commits: CommitInfo[] = [];
+    const lines = result.data.split('\n').filter(l => l.trim());
+    
+    for (const line of lines) {
+        const parts = line.split('|');
+        if (parts.length >= 6) {
+            commits.push({
+                hash: parts[0],
+                shortHash: parts[1],
+                author: parts[2],
+                email: parts[3],
+                date: parts[4],
+                message: parts.slice(5).join('|'),
+                subject: parts.slice(5).join('|'),
+                body: '',
+            });
+        }
+    }
+    
+    return { success: true, data: commits };
+}

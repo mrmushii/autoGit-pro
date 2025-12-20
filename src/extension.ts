@@ -12,6 +12,7 @@ import { executeAutoPull } from './commands/autoPull';
 import { isGitInstalled } from './utils/git';
 import { initTemplatesManager, getTemplatesManager } from './utils/templates';
 import { initAnalyticsManager, getAnalyticsManager } from './utils/analytics';
+import { HistoryPanel } from './ui/historyPanel';
 
 
 /**
@@ -122,6 +123,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
     );
     context.subscriptions.push(showStatsCommand);
+
+    // Register the show history command
+    const showHistoryCommand = vscode.commands.registerCommand(
+        'autogit-pro.showHistory',
+        async () => {
+            try {
+                await HistoryPanel.createOrShow(context.extensionUri);
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Unknown error';
+                void vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
+                console.error('AutoGit Pro Error:', error);
+            }
+        }
+    );
+    context.subscriptions.push(showHistoryCommand);
 
     
     // Show welcome message on first activation
