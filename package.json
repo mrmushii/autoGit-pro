@@ -2,7 +2,7 @@
   "name": "autogit-pro",
   "displayName": "AutoGit Pro",
   "description": "Automate Git workflows with AI-powered commit message generation",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "publisher": "autogit-pro",
   "author": {
     "name": "Mushfiqur Rahman",

@@ -3,7 +3,7 @@
 > **One-click Git workflow automation with AI-powered commit messages**
 
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue.svg)](https://code.visualstudio.com/)
-[![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.2.0-brightgreen.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ![AutoGit Pro Hero](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/hero-banner.png)
@@ -39,6 +39,31 @@ When conflicts or errors occur, AI explains what went wrong in plain language an
 - Provides tailored resolution instructions
 - Works with Groq, OpenAI, and Gemini
 - Falls back to formatted display if AI isn't configured
+
+### 🎨 Advanced Commit Styles (NEW in v1.2.0!)
+Choose your preferred commit message format:
+- **Basic**: Simple descriptive messages
+- **Conventional**: `feat(scope): description` format
+- **Detailed**: Multi-line with bullet points
+
+![AI Commit Styles](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/feature-ai-styles.png)
+
+### 📝 Custom Templates (NEW in v1.2.0!)
+Save and reuse your favorite commit message patterns with variable support.
+
+![Custom Templates](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/feature-templates.png)
+
+### 📊 Analytics Dashboard (NEW in v1.2.0!)
+- Track commits, pushes, pulls, and AI messages
+- See your estimated **time saved**
+- View **Commit History & Analysis** with quality scoring
+
+![Analytics Dashboard](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/feature-analytics.png)
+
+### ⚡ Auto-Commit on Save (NEW in v1.2.0!)
+Enable automatic commits when you save files with debounced batching.
+
+![Auto-Commit](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/feature-auto-commit.png)
 
 ---
 
@@ -85,6 +110,10 @@ Press **`Ctrl+Alt+G`** (Windows/Linux) or **`Cmd+Alt+G`** (Mac) and follow the p
 | **Commit & Push** | `Ctrl+Alt+G` | `Cmd+Alt+G` | Full interactive workflow with prompts |
 | **Quick Commit** | `Ctrl+Shift+Alt+C` | `Cmd+Shift+Alt+C` | ⚡ Instant commit with AI message (no prompts) |
 | **Sync (Pull & Push)** | `Ctrl+Shift+Alt+P` | `Cmd+Shift+Alt+P` | 🔄 Pull remote + push local commits |
+| **Show My Stats** | — | — | 📊 View usage analytics and time saved |
+| **Commit History** | — | — | 📈 Open history dashboard with AI analysis |
+| **Toggle Auto-Commit** | — | — | ⚡ Enable/disable auto-commit on save |
+| **Manage Templates** | — | — | 📝 Create and manage commit templates |
 
 ---
 
@@ -177,6 +206,12 @@ Press **`Ctrl+Alt+G`** (Windows/Linux) or **`Cmd+Alt+G`** (Mac) and follow the p
 | `autogit-pro.autoStageAll` | `true` | Automatically stage all changes |
 | `autogit-pro.pushAfterCommit` | `true` | Automatically push after commit |
 | `autogit-pro.confirmBeforePush` | `true` | Show confirmation before pushing |
+| `autogit-pro.commitStyle` | `basic` | AI commit style: `basic`, `conventional`, `detailed` |
+| `autogit-pro.includeScope` | `true` | Include scope in conventional commits |
+| `autogit-pro.multiRepoMode` | `ask` | Multi-repo handling: `ask`, `all`, `active` |
+| `autogit-pro.scanNestedRepos` | `false` | Scan for nested repos (monorepos) |
+| `autogit-pro.autoCommit.enabled` | `false` | Enable auto-commit on file save |
+| `autogit-pro.autoCommit.delay` | `30` | Seconds to wait before auto-committing |
 
 ---
 
@@ -225,12 +260,16 @@ Don't have Git initialized? No problem!
 
 ---
 
-## 🔄 What's New in v1.1.2
+## 🔄 What's New in v1.2.0
 
-- 🤖 **AI Error Analysis** - AI explains errors and suggests fixes in plain language
-- 🎨 **Professional Error Display** - Raw Git output is now clean and formatted
-- 📋 **Smart Conflict Detection** - Detects rebase, merge, and pull conflicts
-- 🔄 **Sync Command** - Pull + Push in one action (from v1.1.0)
+🎉 **Major Feature Release!** This version brings 6 powerful new features:
+
+- 🎨 **Advanced AI Commit Styles** - Choose Basic, Conventional, or Detailed format
+- 📝 **Custom Commit Templates** - Save and reuse your favorite patterns
+- 🔀 **Multi-Repo Support** - Work with monorepos and multiple repositories
+- 📊 **Local Analytics** - Track productivity and time saved
+- 📈 **Commit History Dashboard** - Beautiful WebView with quality scoring
+- ⚡ **Auto-Commit on Save** - Automatic commits with debouncing
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 

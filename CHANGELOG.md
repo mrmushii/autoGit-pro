@@ -2,9 +2,62 @@
 
 All notable changes to AutoGit Pro will be documented in this file.
 
+## [1.2.0] - 2025-12-21
+
+### 🚀 Major Feature Release
+
+This release brings **6 powerful new features** to supercharge your Git workflow!
+
+### Added
+
+#### 🎨 Advanced AI Commit Styles
+- Choose between **Basic**, **Conventional**, or **Detailed** commit message styles
+- Conventional format: `feat(scope): description`
+- Detailed format: Multi-line with bullet points explaining changes
+- New settings: `commitStyle` and `includeScope`
+
+#### 📝 Custom Commit Templates  
+- Save and reuse your favorite commit message templates
+- 7 built-in templates (Feature, Bug Fix, Docs, Refactor, etc.)
+- Create custom templates with variables: `{type}`, `{scope}`, `{subject}`
+- New command: **"AutoGit Pro: Manage Commit Templates"**
+
+#### 🔀 Multi-Repo Support
+- Work with multiple Git repositories in single workspace
+- Support for **monorepo** structures with nested repos
+- Three modes: `ask` (prompt), `all` (commit all), `active` (use active file's repo)
+- New settings: `multiRepoMode`, `scanNestedRepos`
+
+#### 📊 Local Usage Analytics
+- Track your productivity: commits, pushes, pulls, AI messages
+- Estimated **time saved** displayed after each operation
+- Daily streak tracking for consistent developers
+- New command: **"AutoGit Pro: Show My Stats"**
+- 100% local - no external telemetry!
+
+#### 📈 Commit History Dashboard
+- Beautiful **WebView dashboard** for commit analysis
+- **Code Quality Score** (0-100) based on your practices
+- Statistics: avg files/commit, lines changed, most active day
+- Strengths & Areas to Improve with personalized tips
+- Recent commits timeline with type badges
+- New command: **"AutoGit Pro: Commit History & Analysis"**
+
+#### ⚡ Auto-Commit on Save
+- Automatically commit when you save files
+- **Debounced commits** - batches saves with configurable delay (default 30s)
+- AI-generated commit messages for auto-commits
+- Optional auto-push after commit
+- **Status bar indicator** - click to toggle ON/OFF
+- File pattern filtering with glob support
+- New command: **"AutoGit Pro: Toggle Auto-Commit"**
+
+---
+
 ## [1.1.2] - 2025-12-14
 
 ### Fixed
+
 
 - 🖼️ **README Images** - Fixed images not displaying on VS Code Marketplace 
 
