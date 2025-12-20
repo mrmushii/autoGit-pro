@@ -58,6 +58,10 @@
       {
         "command": "autogit-pro.pull",
         "title": "AutoGit Pro: Pull from Remote"
+      },
+      {
+        "command": "autogit-pro.manageTemplates",
+        "title": "AutoGit Pro: Manage Commit Templates"
       }
     ],
 

@@ -10,6 +10,7 @@ import * as vscode from 'vscode';
 import { executeAutoCommit } from './commands/autoCommit';
 import { executeAutoPull } from './commands/autoPull';
 import { isGitInstalled } from './utils/git';
+import { initTemplatesManager, getTemplatesManager } from './utils/templates';
 
 
 /**
@@ -18,6 +19,9 @@ import { isGitInstalled } from './utils/git';
  */
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     console.log('AutoGit Pro is now active');
+    
+    // Initialize templates manager
+    initTemplatesManager(context);
     
     // Verify Git is available
     const gitAvailable = await isGitInstalled();
@@ -36,7 +40,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 await executeAutoCommit(false);
             } catch (error) {
                 const message = error instanceof Error ? error.message : 'Unknown error';
-                vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
+                void vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
                 console.error('AutoGit Pro Error:', error);
             }
         }
@@ -50,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 await executeAutoCommit(true);
             } catch (error) {
                 const message = error instanceof Error ? error.message : 'Unknown error';
-                vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
+                void vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
                 console.error('AutoGit Pro Error:', error);
             }
         }
@@ -68,19 +72,39 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 await executeAutoPull();
             } catch (error) {
                 const message = error instanceof Error ? error.message : 'Unknown error';
-                vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
+                void vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
                 console.error('AutoGit Pro Error:', error);
             }
         }
     );
     context.subscriptions.push(pullCommand);
 
+    // Register the manage templates command
+    const manageTemplatesCommand = vscode.commands.registerCommand(
+        'autogit-pro.manageTemplates',
+        async () => {
+            try {
+                const manager = getTemplatesManager();
+                if (manager) {
+                    await manager.manageTemplates();
+                } else {
+                    void vscode.window.showErrorMessage('Templates manager not initialized.');
+                }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Unknown error';
+                void vscode.window.showErrorMessage(`AutoGit Pro Error: ${message}`);
+                console.error('AutoGit Pro Error:', error);
+            }
+        }
+    );
+    context.subscriptions.push(manageTemplatesCommand);
+
     
     // Show welcome message on first activation
     const hasShownWelcome = context.globalState.get<boolean>('autogit-pro.welcomeShown');
     if (!hasShownWelcome) {
         const action = await vscode.window.showInformationMessage(
-            'AutoGit Pro activated! Use Ctrl+Shift+G Ctrl+Shift+C to commit & push.',
+            'AutoGit Pro activated! Use Ctrl+Alt+G to commit & push.',
             'Configure AI',
             'Got it'
         );
