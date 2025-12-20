@@ -70,6 +70,10 @@
       {
         "command": "autogit-pro.showHistory",
         "title": "AutoGit Pro: Commit History & Analysis"
+      },
+      {
+        "command": "autogit-pro.toggleAutoCommit",
+        "title": "AutoGit Pro: Toggle Auto-Commit"
       }
     ],
 
@@ -205,6 +209,36 @@
           "type": "boolean",
           "default": false,
           "description": "Scan for nested Git repositories (useful for monorepos with sub-projects)"
+        },
+        "autogit-pro.autoCommit.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable automatic commit on file save"
+        },
+        "autogit-pro.autoCommit.delay": {
+          "type": "number",
+          "default": 30,
+          "minimum": 5,
+          "maximum": 300,
+          "description": "Delay in seconds before auto-committing after save (to batch changes)"
+        },
+        "autogit-pro.autoCommit.patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["**/*"],
+          "description": "File patterns to include for auto-commit (glob patterns)"
+        },
+        "autogit-pro.autoCommit.pushAfterCommit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically push after auto-commit"
+        },
+        "autogit-pro.autoCommit.useAiMessage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use AI to generate commit messages for auto-commits"
         }
       }
     }

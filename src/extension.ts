@@ -13,6 +13,7 @@ import { isGitInstalled } from './utils/git';
 import { initTemplatesManager, getTemplatesManager } from './utils/templates';
 import { initAnalyticsManager, getAnalyticsManager } from './utils/analytics';
 import { HistoryPanel } from './ui/historyPanel';
+import { initAutoCommit } from './utils/autoSave';
 
 
 /**
@@ -27,6 +28,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     
     // Initialize analytics manager
     initAnalyticsManager(context);
+    
+    // Initialize auto-commit manager
+    initAutoCommit(context);
     
     // Verify Git is available
     const gitAvailable = await isGitInstalled();
