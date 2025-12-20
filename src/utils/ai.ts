@@ -1,15 +1,17 @@
 /**
  * AutoGit Pro - AI Commit Message Generator
- * Supports OpenAI and Google Gemini for generating commit messages
+ * Supports OpenAI, Google Gemini, and Groq for generating commit messages
  */
 
 import * as https from 'https';
-import type { AIProviderConfig, AICommitResult, GitDiffContext } from '../types';
+import type { AIProviderConfig, AICommitResult, GitDiffContext, CommitStyle } from '../types';
 
 /**
- * System prompt for generating commit messages following industry standards
+ * System prompts for different commit message styles
  */
-const SYSTEM_PROMPT = `Generate a short, concise git commit message (ONE LINE ONLY, max 72 chars).
+
+// BASIC: Short one-line messages (max 72 chars)
+const BASIC_PROMPT = `Generate a short, concise git commit message (ONE LINE ONLY, max 72 chars).
 
 Format: <type>: <short description>
 
@@ -29,11 +31,92 @@ Examples:
 
 Output ONLY the commit message, nothing else.`;
 
+// CONVENTIONAL: With type and optional scope
+const CONVENTIONAL_PROMPT = `Generate a Conventional Commits format message (ONE LINE, max 72 chars).
+
+Format: <type>(<scope>): <subject>
+
+Types:
+- feat: new feature
+- fix: bug fix
+- docs: documentation changes
+- style: formatting, no code change
+- refactor: code restructuring
+- perf: performance improvement
+- test: adding tests
+- build: build system changes
+- ci: CI configuration
+- chore: maintenance tasks
+
+Scope: optional, the module/component affected (e.g., auth, api, ui)
+
+Rules:
+- Use imperative mood (add, fix, update - not added, fixed, updated)
+- Subject max 50 chars, lowercase
+- NO period at end
+- ONE LINE ONLY
+
+Examples:
+- feat(auth): add JWT token refresh
+- fix(ui): resolve button alignment on mobile
+- refactor(api): simplify error handling logic
+- docs(readme): update installation instructions
+
+Output ONLY the commit message, nothing else.`;
+
+// DETAILED: Multi-line with subject and body
+const DETAILED_PROMPT = `Generate a detailed git commit message with subject line and body.
+
+Format:
+<type>(<scope>): <subject>
+
+- <bullet point 1: what changed>
+- <bullet point 2: why it changed>
+- <bullet point 3: any additional context> (optional)
+
+Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore
+
+Rules:
+- Subject line: max 50 chars, imperative mood, no period
+- Blank line between subject and body
+- Body: 2-4 bullet points explaining WHAT and WHY
+- Each bullet starts with "- "
+- Be specific and helpful for future readers
+
+Example:
+feat(auth): add password reset functionality
+
+- Add forgot password form with email validation
+- Implement reset token generation and verification
+- Send reset email using configured SMTP provider
+
+Output the complete commit message with subject and body.`;
+
+/**
+ * Get the appropriate system prompt based on commit style
+ */
+export function getSystemPrompt(style: CommitStyle, includeScope: boolean = true): string {
+    switch (style) {
+        case 'basic':
+            return BASIC_PROMPT;
+        case 'conventional':
+            if (!includeScope) {
+                // Return modified prompt without scope
+                return CONVENTIONAL_PROMPT.replace(/\(<scope>\)/g, '').replace(/\(e\.g\., auth, api, ui\)/g, '');
+            }
+            return CONVENTIONAL_PROMPT;
+        case 'detailed':
+            return DETAILED_PROMPT;
+        default:
+            return CONVENTIONAL_PROMPT;
+    }
+}
+
 /**
  * AI Provider interface for extensibility
  */
 interface AIProvider {
-    generateCommitMessage(context: GitDiffContext): Promise<AICommitResult>;
+    generateCommitMessage(context: GitDiffContext, style?: CommitStyle, includeScope?: boolean): Promise<AICommitResult>;
 }
 
 /**
@@ -120,17 +203,18 @@ class OpenAIProvider implements AIProvider {
         this.model = model;
     }
 
-    async generateCommitMessage(context: GitDiffContext): Promise<AICommitResult> {
+    async generateCommitMessage(context: GitDiffContext, style: CommitStyle = 'conventional', includeScope: boolean = true): Promise<AICommitResult> {
         try {
             const userPrompt = buildUserPrompt(context);
+            const systemPrompt = getSystemPrompt(style, includeScope);
             
             const requestBody = JSON.stringify({
                 model: this.model,
                 messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
+                    { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt },
                 ],
-                max_tokens: 500,
+                max_tokens: style === 'detailed' ? 800 : 500,
                 temperature: 0.3,
             });
 
@@ -184,10 +268,11 @@ class GeminiProvider implements AIProvider {
         this.model = model;
     }
 
-    async generateCommitMessage(context: GitDiffContext): Promise<AICommitResult> {
+    async generateCommitMessage(context: GitDiffContext, style: CommitStyle = 'conventional', includeScope: boolean = true): Promise<AICommitResult> {
         try {
             const userPrompt = buildUserPrompt(context);
-            const fullPrompt = `${SYSTEM_PROMPT}\n\n${userPrompt}`;
+            const systemPrompt = getSystemPrompt(style, includeScope);
+            const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
             
             const requestBody = JSON.stringify({
                 contents: [
@@ -196,7 +281,7 @@ class GeminiProvider implements AIProvider {
                     },
                 ],
                 generationConfig: {
-                    maxOutputTokens: 500,
+                    maxOutputTokens: style === 'detailed' ? 800 : 500,
                     temperature: 0.3,
                 },
             });
@@ -251,17 +336,18 @@ class GroqProvider implements AIProvider {
         this.model = model;
     }
 
-    async generateCommitMessage(context: GitDiffContext): Promise<AICommitResult> {
+    async generateCommitMessage(context: GitDiffContext, style: CommitStyle = 'conventional', includeScope: boolean = true): Promise<AICommitResult> {
         try {
             const userPrompt = buildUserPrompt(context);
+            const systemPrompt = getSystemPrompt(style, includeScope);
             
             const requestBody = JSON.stringify({
                 model: this.model,
                 messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
+                    { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt },
                 ],
-                max_tokens: 500,
+                max_tokens: style === 'detailed' ? 800 : 500,
                 temperature: 0.3,
             });
 
@@ -337,7 +423,9 @@ export function createAIProvider(config: AIProviderConfig): AIProvider | null {
  */
 export async function generateCommitMessage(
     config: AIProviderConfig,
-    context: GitDiffContext
+    context: GitDiffContext,
+    style: CommitStyle = 'conventional',
+    includeScope: boolean = true
 ): Promise<AICommitResult> {
     const provider = createAIProvider(config);
     
@@ -348,7 +436,7 @@ export async function generateCommitMessage(
         };
     }
     
-    return provider.generateCommitMessage(context);
+    return provider.generateCommitMessage(context, style, includeScope);
 }
 
 /**

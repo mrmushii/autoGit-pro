@@ -170,15 +170,24 @@ async function runWorkflow(terminal: TerminalWorkflow, quickMode: boolean): Prom
     const aiConfigValid = validateAIConfig(aiConfig);
     
     if (aiConfigValid.valid && aiConfig.provider !== 'none') {
-        terminal.showProgress('Generating AI commit message');
+        terminal.showProgress(`Generating AI commit message (${config.commitStyle} style)`);
         
         const contextResult = await getDiffContext(repoPath);
         if (contextResult.success && contextResult.data) {
-            const aiResult = await generateCommitMessage(aiConfig, contextResult.data);
+            const aiResult = await generateCommitMessage(
+                aiConfig, 
+                contextResult.data,
+                config.commitStyle,
+                config.includeScope
+            );
             if (aiResult.success && aiResult.message) {
                 commitMessage = aiResult.message;
                 terminal.showSuccess('AI generated commit message:');
-                terminal.writeLine(`  ${commitMessage}`);
+                // Handle multi-line messages (detailed style)
+                const messageLines = commitMessage.split('\n');
+                for (const line of messageLines) {
+                    terminal.writeLine(`  ${line}`);
+                }
                 terminal.writeLine('');
             } else {
                 terminal.showError(`AI generation failed: ${aiResult.error}`);

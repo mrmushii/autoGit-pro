@@ -83,6 +83,11 @@ export interface AICommitResult {
 }
 
 /**
+ * Commit message style for AI generation
+ */
+export type CommitStyle = 'basic' | 'conventional' | 'detailed';
+
+/**
  * Extension configuration from VS Code settings
  */
 export interface ExtensionConfig {
@@ -98,6 +103,8 @@ export interface ExtensionConfig {
     confirmBeforePush: boolean;
     pushAfterCommit: boolean;
     commitMessageTemplate: string;
+    commitStyle: CommitStyle;
+    includeScope: boolean;
 }
 
 /**
@@ -141,6 +148,8 @@ export function getExtensionConfig(): ExtensionConfig {
         confirmBeforePush: config.get<boolean>('confirmBeforePush', true),
         pushAfterCommit: config.get<boolean>('pushAfterCommit', true),
         commitMessageTemplate: config.get<string>('commitMessageTemplate', ''),
+        commitStyle: config.get<CommitStyle>('commitStyle', 'conventional'),
+        includeScope: config.get<boolean>('includeScope', true),
     };
 }
 

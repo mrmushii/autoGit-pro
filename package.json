@@ -153,6 +153,26 @@
           "type": "string",
           "default": "",
           "description": "Custom template for commit messages. Use {type}, {scope}, {subject} placeholders."
+        },
+        "autogit-pro.commitStyle": {
+          "type": "string",
+          "enum": [
+            "basic",
+            "conventional",
+            "detailed"
+          ],
+          "enumDescriptions": [
+            "Short one-line message (max 72 chars)",
+            "Conventional Commits format with type and optional scope (e.g., feat(auth): add login)",
+            "Detailed multi-line message with subject and bullet-point body"
+          ],
+          "default": "conventional",
+          "description": "Style of AI-generated commit messages"
+        },
+        "autogit-pro.includeScope": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include scope in conventional commits (e.g., feat(auth): ... vs feat: ...)"
         }
       }
     }
