@@ -74,6 +74,10 @@
       {
         "command": "autogit-pro.toggleAutoCommit",
         "title": "AutoGit Pro: Toggle Auto-Commit"
+      },
+      {
+        "command": "autogit-pro.showMenu",
+        "title": "AutoGit Pro: Show Menu"
       }
     ],
 

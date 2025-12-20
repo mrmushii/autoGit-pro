@@ -14,6 +14,7 @@ import { initTemplatesManager, getTemplatesManager } from './utils/templates';
 import { initAnalyticsManager, getAnalyticsManager } from './utils/analytics';
 import { HistoryPanel } from './ui/historyPanel';
 import { initAutoCommit } from './utils/autoSave';
+import { initStatusBarMenu } from './ui/statusBarMenu';
 
 
 /**
@@ -31,6 +32,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     
     // Initialize auto-commit manager
     initAutoCommit(context);
+    
+    // Initialize status bar menu
+    initStatusBarMenu(context);
     
     // Verify Git is available
     const gitAvailable = await isGitInstalled();
