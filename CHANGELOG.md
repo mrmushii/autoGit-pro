@@ -52,6 +52,17 @@ This release brings **6 powerful new features** to supercharge your Git workflow
 - File pattern filtering with glob support
 - New command: **"AutoGit Pro: Toggle Auto-Commit"**
 
+#### 🎛️ Status Bar Command Menu
+- **AutoGit Pro** icon in status bar with dropdown menu
+- Quick access to all commands without Command Palette
+- Organized sections: Git Actions, Analytics, Tools, Settings
+
+### Improved
+
+- 🎨 **Lucide Icons** - Professional SVG icons in History Dashboard (replaced emojis)
+- 🖥️ **Codicons** - VS Code native icons in analytics and status bar
+- ✨ **Clean UI** - Removed emojis from tips for professional look
+
 ---
 
 ## [1.1.2] - 2025-12-14

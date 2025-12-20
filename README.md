@@ -65,6 +65,9 @@ Enable automatic commits when you save files with debounced batching.
 
 ![Auto-Commit](https://raw.githubusercontent.com/mrmushii/autoGit-pro/main/images/feature-auto-commit.png)
 
+### 🎛️ Status Bar Menu (NEW in v1.2.0!)
+Click the **AutoGit Pro** icon in the status bar for a dropdown with all commands - no more Command Palette hunting!
+
 ---
 
 
